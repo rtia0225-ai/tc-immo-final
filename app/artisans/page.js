@@ -1,0 +1,98 @@
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+
+export default async function ArtisansPage({ searchParams }) {
+  const supabase = createClient();
+  const { trade, city } = searchParams || {};
+  // Note : "type de maison" et "recommandation" du formulaire d'accueil sont
+  // capturés mais pas encore reliés à une colonne dédiée — à affiner une fois
+  // qu'on décide comment les modéliser (ex: tags projet, seuil d'avis).
+
+  let query = supabase
+    .from("artisan_profiles")
+    .select(
+      `id, trade, bio, years_experience, is_verified, hourly_rate, currency,
+       services, projects_completed,
+       profiles ( full_name, city, avatar_url )`
+    )
+    .order("is_verified", { ascending: false });
+
+  if (trade) query = query.ilike("trade", `%${trade}%`);
+
+  const { data: allArtisans } = await query;
+
+  // Filtre sur la ville côté application (car c'est un champ de la table liée `profiles`)
+  const artisans = city
+    ? (allArtisans || []).filter((a) =>
+        a.profiles?.city?.toLowerCase().includes(city.toLowerCase())
+      )
+    : allArtisans;
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-10">
+      <h1 className="font-heading text-2xl font-bold">Trouver un artisan</h1>
+
+      {/* Barre de recherche, reprend les mêmes critères que l'accueil */}
+      <form action="/artisans" className="mt-4 flex flex-wrap gap-2">
+        <input
+          name="trade"
+          defaultValue={trade || ""}
+          placeholder="Métier (ex: Maçon)"
+          className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
+        />
+        <input
+          name="city"
+          defaultValue={city || ""}
+          placeholder="Ville (ex: Cocody)"
+          className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
+        />
+        <button type="submit" className="rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
+          Filtrer
+        </button>
+      </form>
+
+      {!artisans || artisans.length === 0 ? (
+        <p className="mt-8 text-gray-500">Aucun artisan ne correspond à ta recherche.</p>
+      ) : (
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          {artisans.map((a) => (
+            <Link
+              key={a.id}
+              href={`/artisans/${a.id}`}
+              className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm hover:shadow-md"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  {a.is_verified && (
+                    <span className="mb-1 inline-block rounded-full bg-brand-light px-2 py-0.5 text-[10px] font-bold uppercase text-brand">
+                      {a.trade}
+                    </span>
+                  )}
+                  <p className="font-heading font-bold">{a.profiles?.full_name}</p>
+                  <p className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+                    📍 {a.profiles?.city || "Côte d'Ivoire"}
+                  </p>
+                </div>
+              </div>
+
+              {a.services && a.services.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1">
+                  {a.services.map((s) => (
+                    <span key={s} className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-600">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="mt-4 flex items-center justify-between text-sm">
+                <span className="text-gray-500">{a.projects_completed || 0} projets réalisés</span>
+                <span className="font-medium text-forest">Voir le profil →</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
