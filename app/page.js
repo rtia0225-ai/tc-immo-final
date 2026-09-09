@@ -37,122 +37,125 @@ export default async function HomePage() {
 
   return (
     <div>
-      {/* Hero */}
-      <section className="hero-gradient relative overflow-hidden px-4 py-24 text-center text-white">
-        <div className="relative mx-auto max-w-2xl animate-fadeUp">
-          <span className="inline-block rounded-full bg-white/15 px-4 py-1.5 text-xs font-bold uppercase tracking-wide backdrop-blur">
-            France — Côte d'Ivoire
-          </span>
-          <h1 className="font-heading mt-5 text-4xl font-extrabold leading-[1.1] sm:text-5xl">
-            Construisez chez vous, en toute sécurité, depuis l'étranger
-          </h1>
-          <p className="mt-5 text-lg text-white/90">
-            TC-Immo connecte la diaspora à des artisans vérifiés en Côte d'Ivoire.
-            Paiement séquestré, chantier suivi en temps réel.
-          </p>
+      {/* Hero : vraie photo, texte compact, bandeau de recherche qui chevauche */}
+      <section className="relative">
+        <div className="relative h-[420px] w-full overflow-hidden sm:h-[460px]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/hero-elephants.jpg"
+            alt="Savane en Côte d'Ivoire"
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/10" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white">
+            <h1 className="font-heading max-w-xl text-3xl font-extrabold leading-tight sm:text-4xl">
+              Construisez chez vous, en toute sécurité, depuis l'étranger
+            </h1>
+            <p className="mt-3 max-w-md text-sm text-white/90 sm:text-base">
+              TC-Immo connecte la diaspora à des artisans vérifiés en Côte d'Ivoire.
+            </p>
+          </div>
         </div>
 
-        {/* Carte de recherche flottante */}
-        <form
-          action="/artisans"
-          className="relative mx-auto mt-10 w-full max-w-3xl rounded-3xl bg-white p-6 text-left shadow-2xl animate-fadeUp"
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wide text-gray-400">Métier</label>
-              <select name="trade" defaultValue="" className="mt-1 w-full rounded-xl border border-gray-200 p-2.5 text-sm text-gray-800 hover:border-brand focus:border-brand focus:outline-none">
-                <option value="">Tous les métiers</option>
+        {/* Bandeau de recherche dense, pratique, qui chevauche le bas du hero */}
+        <div className="relative z-10 mx-auto -mt-8 max-w-5xl px-4">
+          <form
+            action="/artisans"
+            className="grid gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200 shadow-lg sm:grid-cols-5"
+          >
+            <div className="bg-white p-3">
+              <label className="block text-[11px] font-semibold uppercase tracking-wide text-gray-400">Métier</label>
+              <select name="trade" defaultValue="" className="mt-0.5 w-full border-0 bg-transparent p-0 text-sm font-medium text-ink focus:outline-none">
+                <option value="">Tous</option>
                 {CONSTRUCTION_SERVICES.map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
             </div>
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wide text-gray-400">Type de maison</label>
-              <select name="house_type" defaultValue="" className="mt-1 w-full rounded-xl border border-gray-200 p-2.5 text-sm text-gray-800 hover:border-brand focus:border-brand focus:outline-none">
-                <option value="">Tous types</option>
+            <div className="bg-white p-3">
+              <label className="block text-[11px] font-semibold uppercase tracking-wide text-gray-400">Type de bien</label>
+              <select name="house_type" defaultValue="" className="mt-0.5 w-full border-0 bg-transparent p-0 text-sm font-medium text-ink focus:outline-none">
+                <option value="">Tous</option>
                 {HOUSE_TYPES.map((t) => (
                   <option key={t} value={t}>{t}</option>
                 ))}
               </select>
             </div>
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wide text-gray-400">Ville</label>
-              <select name="city" defaultValue="" className="mt-1 w-full rounded-xl border border-gray-200 p-2.5 text-sm text-gray-800 hover:border-brand focus:border-brand focus:outline-none">
-                <option value="">Toutes les villes</option>
+            <div className="bg-white p-3">
+              <label className="block text-[11px] font-semibold uppercase tracking-wide text-gray-400">Ville</label>
+              <select name="city" defaultValue="" className="mt-0.5 w-full border-0 bg-transparent p-0 text-sm font-medium text-ink focus:outline-none">
+                <option value="">Toutes</option>
                 {CI_CITIES.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
             </div>
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wide text-gray-400">Recommandation</label>
-              <select name="recommendation" defaultValue="" className="mt-1 w-full rounded-xl border border-gray-200 p-2.5 text-sm text-gray-800 hover:border-brand focus:border-brand focus:outline-none">
+            <div className="bg-white p-3">
+              <label className="block text-[11px] font-semibold uppercase tracking-wide text-gray-400">Recommandation</label>
+              <select name="recommendation" defaultValue="" className="mt-0.5 w-full border-0 bg-transparent p-0 text-sm font-medium text-ink focus:outline-none">
                 <option value="">Toute la liste</option>
                 {RECOMMENDATION_OPTIONS.map((r) => (
                   <option key={r.value} value={r.value}>{r.label}</option>
                 ))}
               </select>
             </div>
-          </div>
-          <button
-            type="submit"
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3.5 font-heading font-bold text-white shadow-glow hover:-translate-y-0.5 hover:bg-brand-dark"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-            Rechercher
-          </button>
-        </form>
+            <button
+              type="submit"
+              className="flex items-center justify-center gap-2 bg-brand text-sm font-bold text-white hover:bg-brand-dark"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              Rechercher
+            </button>
+          </form>
+        </div>
       </section>
 
       {/* Artisans vérifiés */}
       <section className="mx-auto max-w-6xl px-4 py-16">
         <div className="flex items-end justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-brand">Sélection du moment</p>
-            <h2 className="font-heading mt-1 text-3xl font-extrabold text-ink">Artisans vérifiés</h2>
-          </div>
-          <Link href="/artisans" className="hidden text-sm font-bold text-forest hover:underline sm:block">
-            Voir tous les profils →
+          <h2 className="font-heading text-2xl font-bold text-ink">Artisans vérifiés</h2>
+          <Link href="/artisans" className="text-sm font-semibold text-brand hover:underline">
+            Voir tous les profils
           </Link>
         </div>
 
         {!artisans || artisans.length === 0 ? (
-          <p className="mt-8 text-gray-500">Aucun artisan pour le moment.</p>
+          <p className="mt-6 text-gray-500">Aucun artisan pour le moment.</p>
         ) : (
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {artisans.map((a) => (
               <Link
                 key={a.id}
                 href={`/artisans/${a.id}`}
-                className="group overflow-hidden rounded-2xl bg-white shadow-card hover:-translate-y-1 hover:shadow-card-hover"
+                className="group overflow-hidden rounded-lg border border-gray-200 bg-white hover:shadow-md"
               >
                 {a.profiles?.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={a.profiles.avatar_url}
                     alt={a.profiles?.full_name}
-                    className="h-44 w-full object-cover"
+                    className="h-40 w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-44 items-center justify-center bg-gradient-to-br from-forest-light via-gold-light to-brand-light font-heading text-3xl font-extrabold text-forest">
+                  <div className="flex h-40 items-center justify-center bg-gray-50 font-heading text-2xl font-bold text-gray-300">
                     {a.profiles?.full_name?.slice(0, 2).toUpperCase()}
                   </div>
                 )}
-                <div className="p-5">
-                  {a.is_verified && (
-                    <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-forest-light px-2.5 py-0.5 text-[11px] font-bold text-forest">
-                      ✓ Vérifié
-                    </span>
-                  )}
-                  <p className="font-heading text-base font-bold text-ink">{a.profiles?.full_name}</p>
-                  <p className="mt-1 text-sm text-gray-500">
+                <div className="p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="font-heading text-sm font-bold text-ink">{a.profiles?.full_name}</p>
+                    {a.is_verified && (
+                      <span className="rounded bg-forest px-1.5 py-0.5 text-[10px] font-bold text-white">
+                        Vérifié
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
                     {a.trade} · {a.profiles?.city || "Côte d'Ivoire"}
                   </p>
-                  <p className="mt-3 text-sm font-bold text-brand group-hover:underline">Voir le profil →</p>
                 </div>
               </Link>
             ))}
@@ -161,25 +164,20 @@ export default async function HomePage() {
       </section>
 
       {/* Comment ça marche */}
-      <section className="bg-gradient-to-b from-white to-gold-light/40 px-4 py-16">
+      <section className="border-t border-gray-100 bg-gray-50 px-4 py-16">
         <div className="mx-auto max-w-6xl">
-          <p className="text-xs font-bold uppercase tracking-wide text-brand">Comment ça marche ?</p>
-          <h2 className="font-heading mt-1 text-3xl font-extrabold text-ink">
-            Vous gérez vos travaux, nous gérons la sécurité
-          </h2>
+          <h2 className="font-heading text-2xl font-bold text-ink">Comment ça marche</h2>
+          <p className="mt-1 text-sm text-gray-500">Vous gérez vos travaux, nous gérons la sécurité.</p>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-2">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2">
             {STEPS.map((step) => (
-              <div
-                key={step.n}
-                className="flex gap-4 rounded-2xl bg-white p-6 shadow-card hover:-translate-y-1 hover:shadow-card-hover"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand to-gold font-heading text-sm font-extrabold text-white">
+              <div key={step.n} className="flex gap-4 rounded-lg border border-gray-200 bg-white p-5">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand font-heading text-sm font-bold text-white">
                   {step.n}
                 </div>
                 <div>
-                  <p className="font-heading font-bold text-ink">{step.title}</p>
-                  <p className="mt-1.5 text-sm leading-relaxed text-gray-500">{step.text}</p>
+                  <p className="font-heading text-sm font-bold text-ink">{step.title}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-gray-500">{step.text}</p>
                 </div>
               </div>
             ))}

@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 body {
-  background-color: #fbfbfa;
+  background-color: #ffffff;
   color: #161a1e;
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -13,17 +13,9 @@ body {
 
 h1, h2, h3, h4, .font-heading {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
 }
 
-* {
-  transition-property: color, background-color, border-color, box-shadow, transform;
-  transition-duration: 180ms;
-  transition-timing-function: ease;
-}
-
-.hero-gradient {
-  background: linear-gradient(120deg, #c81c1c, #f22222 35%, #f5a623 70%, #096338);
-  background-size: 250% 250%;
-  animation: gradientShift 10s ease infinite;
+a, button {
+  transition: all 150ms ease;
 }
