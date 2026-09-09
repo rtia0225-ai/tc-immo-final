@@ -56,27 +56,6 @@ export default function Navbar({ user }) {
       {menuOpen && (
         <div className="border-t border-gray-100 bg-white px-4 py-3">
           <div className="mx-auto flex max-w-6xl flex-col gap-1 text-sm font-medium text-ink">
-            <Link href="/artisans" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
-              Trouver un artisan
-            </Link>
-            {user ? (
-              <>
-                <Link href="/messages" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
-                  Messages
-                </Link>
-                <Link href="/appointments" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
-                  Rendez-vous
-                </Link>
-                <Link href="/dashboard" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
-                  Mon espace
-                </Link>
-              </>
-            ) : (
-              <Link href="/auth/signup" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
-                Créer un compte
-              </Link>
-            )}
-            <div className="my-1 border-t border-gray-100" />
             <Link href="/a-propos" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
               À propos
             </Link>
