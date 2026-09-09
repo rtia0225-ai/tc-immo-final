@@ -1,28 +1,27 @@
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 px-4 py-10 text-gray-300">
-      <div className="mx-auto grid max-w-6xl gap-8 sm:grid-cols-2">
+    <footer className="border-t border-line bg-stone">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:grid-cols-[1.4fr_1fr]">
         <div>
-          <p className="font-heading text-lg font-extrabold">
-            <span className="text-forest">TC</span> - <span className="text-brand">Immo</span>
-          </p>
-          <p className="mt-3 max-w-xs text-sm text-gray-400">
+          <p className="font-heading text-lg font-semibold text-ink">TC—Immo</p>
+          <p className="mt-3 max-w-sm text-sm leading-relaxed text-ink/60">
             La marketplace de confiance pour construire en Côte d'Ivoire depuis l'étranger.
+            Artisans vérifiés, paiement séquestré, suivi de chantier en temps réel.
           </p>
         </div>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Plateforme</p>
-          <ul className="mt-3 space-y-2 text-sm">
-            <li><a href="/artisans" className="hover:text-white">Trouver un prestataire</a></li>
-            <li><a href="#" className="hover:text-white">À propos</a></li>
-            <li><a href="#" className="hover:text-white">Comment ça marche</a></li>
-            <li><a href="#" className="hover:text-white">Ressources</a></li>
-            <li><a href="#" className="hover:text-white">FAQ</a></li>
+          <p className="text-sm font-medium text-ink">Plateforme</p>
+          <ul className="mt-3 space-y-2 text-sm text-ink/60">
+            <li><a href="/artisans" className="hover:text-ink">Trouver un prestataire</a></li>
+            <li><a href="#" className="hover:text-ink">À propos</a></li>
+            <li><a href="#" className="hover:text-ink">Comment ça marche</a></li>
+            <li><a href="#" className="hover:text-ink">Ressources</a></li>
+            <li><a href="#" className="hover:text-ink">FAQ</a></li>
           </ul>
         </div>
       </div>
-      <p className="mx-auto mt-8 max-w-6xl border-t border-gray-800 pt-6 text-xs text-gray-500">
-        © 2026 TC - Immo. Tous droits réservés.
+      <p className="mx-auto max-w-6xl border-t border-line px-4 py-5 text-xs text-ink/40">
+        © 2026 TC—Immo. Tous droits réservés.
       </p>
     </footer>
   );

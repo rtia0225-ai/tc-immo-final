@@ -34,23 +34,16 @@ export default async function ArtisansPage({ searchParams }) {
     .order("is_verified", { ascending: false });
 
   let artisans = (allArtisans || []).filter((a) => {
-    // Métier : correspond au métier principal OU à l'un des services proposés
     const matchesTrade =
       !trade || a.trade === trade || (a.services || []).includes(trade);
-
-    // Ville : correspond à sa ville de base, à sa zone de mobilité déclarée,
-    // ou il est disponible partout en Côte d'Ivoire
     const matchesCity =
       !city ||
       a.profiles?.city === city ||
       a.mobility_scope === "all" ||
       (a.mobility_cities || []).includes(city);
-
     return matchesTrade && matchesCity;
   });
 
-  // "3 recommandations" : les 3 meilleurs profils (vérifiés en priorité,
-  // puis les plus expérimentés). "Toute la liste" : aucune limite.
   if (recommendation === "top3") {
     artisans = [...artisans]
       .sort((a, b) => (b.years_experience || 0) - (a.years_experience || 0))
@@ -58,47 +51,46 @@ export default async function ArtisansPage({ searchParams }) {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="font-heading text-2xl font-bold">Trouver un artisan</h1>
+    <div className="mx-auto max-w-6xl px-4 py-14">
+      <h1 className="font-heading text-2xl font-medium text-ink">Trouver un artisan</h1>
 
-      {/* Barre de recherche, reprend les mêmes critères que l'accueil */}
-      <form action="/artisans" className="mt-4 flex flex-wrap gap-2">
-        <select name="trade" defaultValue={trade || ""} className="flex-1 rounded-lg border border-gray-300 p-2 text-sm">
+      <form action="/artisans" className="mt-6 grid gap-px overflow-hidden border border-line bg-line sm:grid-cols-4">
+        <select name="trade" defaultValue={trade || ""} className="bg-white p-3 text-sm text-ink focus:outline-none">
           <option value="">Tous les métiers</option>
           {CONSTRUCTION_SERVICES.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-        <select name="city" defaultValue={city || ""} className="flex-1 rounded-lg border border-gray-300 p-2 text-sm">
+        <select name="city" defaultValue={city || ""} className="bg-white p-3 text-sm text-ink focus:outline-none">
           <option value="">Toutes les villes</option>
           {CI_CITIES.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
-        <select name="recommendation" defaultValue={recommendation || ""} className="flex-1 rounded-lg border border-gray-300 p-2 text-sm">
+        <select name="recommendation" defaultValue={recommendation || ""} className="bg-white p-3 text-sm text-ink focus:outline-none">
           <option value="">Toute la liste</option>
           {RECOMMENDATION_OPTIONS.map((r) => (
             <option key={r.value} value={r.value}>{r.label}</option>
           ))}
         </select>
-        <button type="submit" className="rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
+        <button type="submit" className="bg-ink text-sm font-medium text-stone hover:bg-black">
           Filtrer
         </button>
       </form>
 
       {recommendation === "top3" && (
-        <p className="mt-3 text-sm text-gray-500">Nos 3 recommandations les plus expérimentées.</p>
+        <p className="mt-4 text-sm text-ink/50">Nos 3 recommandations les plus expérimentées.</p>
       )}
 
       {artisans.length === 0 ? (
-        <p className="mt-8 text-gray-500">Aucun artisan ne correspond à ta recherche.</p>
+        <p className="mt-10 text-ink/50">Aucun artisan ne correspond à ta recherche.</p>
       ) : (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        <div className="mt-8 grid gap-px overflow-hidden border border-line bg-line sm:grid-cols-2">
           {artisans.map((a) => (
             <Link
               key={a.id}
               href={`/artisans/${a.id}`}
-              className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm hover:shadow-md"
+              className="flex flex-col gap-3 bg-white p-5 hover:bg-stone"
             >
               <div className="flex items-start gap-3">
                 {a.profiles?.avatar_url ? (
@@ -109,37 +101,35 @@ export default async function ArtisansPage({ searchParams }) {
                     className="h-12 w-12 shrink-0 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gray-100 font-heading text-sm font-bold text-gray-400">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line font-heading text-sm text-ink/40">
                     {a.profiles?.full_name?.slice(0, 2).toUpperCase()}
                   </div>
                 )}
                 <div>
-                  {a.is_verified && (
-                    <span className="mb-1 inline-block rounded-full bg-brand-light px-2 py-0.5 text-[10px] font-bold uppercase text-brand">
-                      {a.trade}
-                    </span>
-                  )}
-                  <p className="font-heading font-bold">{a.profiles?.full_name}</p>
-                  <p className="mt-1 flex items-center gap-1 text-xs text-gray-500">
-                    📍 {a.profiles?.city || "Côte d'Ivoire"}
+                  <p className="font-heading font-medium text-ink">{a.profiles?.full_name}</p>
+                  <p className="mt-0.5 text-xs text-ink/50">
+                    {a.trade} · {a.profiles?.city || "Côte d'Ivoire"}
                     {a.mobility_scope === "all" && " · Toute la CI"}
                   </p>
+                  {a.is_verified && (
+                    <p className="mt-1 text-xs font-medium text-forest">Profil vérifié</p>
+                  )}
                 </div>
               </div>
 
               {a.services && a.services.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1.5">
                   {a.services.map((s) => (
-                    <span key={s} className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-600">
+                    <span key={s} className="border border-line px-2 py-0.5 text-[11px] text-ink/60">
                       {s}
                     </span>
                   ))}
                 </div>
               )}
 
-              <div className="mt-4 flex items-center justify-between text-sm">
-                <span className="text-gray-500">{a.projects_completed || 0} projets réalisés</span>
-                <span className="font-medium text-forest">Voir le profil →</span>
+              <div className="flex items-center justify-between border-t border-line pt-3 text-sm">
+                <span className="text-ink/50">{a.projects_completed || 0} projets réalisés</span>
+                <span className="font-medium text-forest">Voir le profil</span>
               </div>
             </Link>
           ))}

@@ -7,22 +7,22 @@ const STEPS = [
   {
     n: 1,
     title: "Choisissez votre prestataire",
-    text: "Lancez votre recherche et consultez les profils vérifiés, les avis, les réalisations. Prenez rendez-vous en visio directement via la plateforme avec ceux que vous avez sélectionnés puis choisissez-en un.",
+    text: "Consultez les profils vérifiés, les avis, les réalisations. Prenez rendez-vous en visio directement avec ceux que vous avez sélectionnés.",
   },
   {
     n: 2,
     title: "Sécurisez vos travaux",
-    text: "Une fois votre prestataire choisi, recevez son devis et signez le contrat tripartite avec la planification des travaux.",
+    text: "Recevez le devis de votre prestataire et signez le contrat tripartite avec la planification des travaux.",
   },
   {
     n: 3,
     title: "Payez en sécurité et à votre rythme",
-    text: "Une fois votre contrat signé, payez à votre rythme (avec l'accord de l'artisan). C'est vous qui décidez du financement de vos travaux.",
+    text: "C'est vous qui décidez du financement — les fonds restent séquestrés jusqu'à validation de chaque étape.",
   },
   {
     n: 4,
     title: "Suivez vos travaux",
-    text: "Suivez l'état d'avancement de vos travaux n'importe où en vous connectant à votre espace.",
+    text: "Consultez l'état d'avancement de votre chantier depuis votre espace, où que vous soyez.",
   },
 ];
 
@@ -35,119 +35,116 @@ export default async function HomePage() {
       `id, trade, is_verified, profiles ( full_name, city, avatar_url )`
     )
     .order("is_verified", { ascending: false })
-    .limit(8);
+    .limit(6);
 
   return (
     <div>
-      {/* Hero */}
-      <section
-        className="relative flex flex-col items-center justify-center px-4 py-24 text-center text-white"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(9,20,15,0.55), rgba(9,20,15,0.8)), linear-gradient(120deg, #7a4a26, #c07a3c 45%, #e0a35c 70%, #3a2a1a)",
-        }}
-      >
-        <h1 className="font-heading max-w-2xl text-4xl font-extrabold leading-tight sm:text-5xl">
-          Construire en Côte d'Ivoire, en toute sécurité, depuis la France
-        </h1>
-        <p className="mt-4 max-w-xl text-white/90">
-          Soyez maître de vos travaux : trouvez votre artisan, suivez vos travaux en temps réel, payez à votre rythme.
-        </p>
-
-        {/* Search card */}
-        <form
-          action="/artisans"
-          className="mt-10 w-full max-w-3xl rounded-2xl bg-white p-5 text-left shadow-xl"
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Artisans</label>
-              <select name="trade" defaultValue="" className="mt-1 w-full rounded-lg border border-gray-200 p-2 text-sm text-gray-800">
-                <option value="">Tous les métiers</option>
-                {CONSTRUCTION_SERVICES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Type de maison</label>
-              <select name="house_type" defaultValue="" className="mt-1 w-full rounded-lg border border-gray-200 p-2 text-sm text-gray-800">
-                <option value="">Tous types</option>
-                {HOUSE_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Ville</label>
-              <select name="city" defaultValue="" className="mt-1 w-full rounded-lg border border-gray-200 p-2 text-sm text-gray-800">
-                <option value="">Toutes les villes</option>
-                {CI_CITIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Recommandation</label>
-              <select name="recommendation" defaultValue="" className="mt-1 w-full rounded-lg border border-gray-200 p-2 text-sm text-gray-800">
-                <option value="">Choisir</option>
-                {RECOMMENDATION_OPTIONS.map((r) => (
-                  <option key={r.value} value={r.value}>{r.label}</option>
-                ))}
-              </select>
-            </div>
+      {/* Hero — structuré en deux colonnes, pas de photo générique */}
+      <section className="border-b border-line bg-stone px-4 py-20">
+        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+          <div>
+            <p className="text-sm font-medium text-clay">France — Côte d'Ivoire</p>
+            <h1 className="font-heading mt-3 text-4xl font-semibold leading-[1.1] text-ink sm:text-5xl">
+              Construire chez vous, en toute sécurité, depuis l'étranger
+            </h1>
+            <p className="mt-5 max-w-md text-base leading-relaxed text-ink/70">
+              TC—Immo connecte la diaspora à des artisans vérifiés en Côte d'Ivoire.
+              Le paiement reste séquestré, le chantier reste sous vos yeux.
+            </p>
           </div>
-          <button
-            type="submit"
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-3 font-semibold text-white hover:bg-brand-dark"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-            Trouver
-          </button>
-        </form>
+
+          {/* Formulaire de recherche façon document, pas de carte flottante */}
+          <form action="/artisans" className="border border-line bg-white p-6">
+            <p className="text-xs font-medium uppercase tracking-wide text-ink/50">
+              Rechercher un artisan
+            </p>
+            <div className="mt-4 grid gap-px overflow-hidden border border-line bg-line sm:grid-cols-2">
+              <div className="bg-white p-4">
+                <label className="text-xs text-ink/50">Métier</label>
+                <select name="trade" defaultValue="" className="mt-1 w-full border-0 bg-transparent p-0 text-sm text-ink focus:outline-none">
+                  <option value="">Tous les métiers</option>
+                  {CONSTRUCTION_SERVICES.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="bg-white p-4">
+                <label className="text-xs text-ink/50">Type de maison</label>
+                <select name="house_type" defaultValue="" className="mt-1 w-full border-0 bg-transparent p-0 text-sm text-ink focus:outline-none">
+                  <option value="">Tous types</option>
+                  {HOUSE_TYPES.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="bg-white p-4">
+                <label className="text-xs text-ink/50">Ville</label>
+                <select name="city" defaultValue="" className="mt-1 w-full border-0 bg-transparent p-0 text-sm text-ink focus:outline-none">
+                  <option value="">Toutes les villes</option>
+                  {CI_CITIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="bg-white p-4">
+                <label className="text-xs text-ink/50">Recommandation</label>
+                <select name="recommendation" defaultValue="" className="mt-1 w-full border-0 bg-transparent p-0 text-sm text-ink focus:outline-none">
+                  <option value="">Toute la liste</option>
+                  {RECOMMENDATION_OPTIONS.map((r) => (
+                    <option key={r.value} value={r.value}>{r.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="mt-4 w-full bg-ink py-3 text-sm font-medium text-stone hover:bg-black"
+            >
+              Rechercher
+            </button>
+          </form>
+        </div>
       </section>
 
       {/* Artisans vérifiés */}
-      <section className="mx-auto max-w-6xl px-4 py-14">
-        <p className="text-xs font-bold uppercase tracking-wide text-brand">Artisans vérifiés et suivis</p>
-        <h2 className="font-heading mt-1 text-2xl font-bold">Les meilleurs professionnels de confiance</h2>
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <div className="flex items-baseline justify-between border-b border-line pb-4">
+          <h2 className="font-heading text-2xl font-medium text-ink">Artisans vérifiés</h2>
+          <Link href="/artisans" className="text-sm text-forest hover:underline">
+            Voir tous les profils
+          </Link>
+        </div>
 
         {!artisans || artisans.length === 0 ? (
-          <p className="mt-6 text-gray-500">Aucun artisan pour le moment.</p>
+          <p className="mt-6 text-ink/50">Aucun artisan pour le moment.</p>
         ) : (
-          <div className="mt-6 flex gap-4 overflow-x-auto pb-2">
+          <div className="mt-6 grid gap-px overflow-hidden border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
             {artisans.map((a) => (
               <Link
                 key={a.id}
                 href={`/artisans/${a.id}`}
-                className="w-64 shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md"
+                className="flex items-center gap-4 bg-white p-5 hover:bg-stone"
               >
                 {a.profiles?.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={a.profiles.avatar_url}
                     alt={a.profiles?.full_name}
-                    className="h-36 w-full object-cover"
+                    className="h-14 w-14 shrink-0 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-36 items-center justify-center bg-gradient-to-br from-forest-light to-brand-light text-4xl">
-                    🛠️
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-line font-heading text-sm text-ink/40">
+                    {a.profiles?.full_name?.slice(0, 2).toUpperCase()}
                   </div>
                 )}
-                <div className="p-4">
-                  {a.is_verified && (
-                    <span className="mb-2 inline-block rounded-full bg-brand-light px-2 py-0.5 text-[10px] font-bold uppercase text-brand">
-                      {a.trade}
-                    </span>
-                  )}
-                  <p className="font-heading text-sm font-bold">{a.profiles?.full_name}</p>
-                  <p className="mt-1 flex items-center gap-1 text-xs text-gray-500">
-                    📍 {a.profiles?.city || "Côte d'Ivoire"}
+                <div>
+                  <p className="font-heading font-medium text-ink">{a.profiles?.full_name}</p>
+                  <p className="mt-0.5 text-xs text-ink/50">
+                    {a.trade} · {a.profiles?.city || "Côte d'Ivoire"}
                   </p>
-                  <p className="mt-3 text-xs font-medium text-forest">Voir le profil →</p>
+                  {a.is_verified && (
+                    <p className="mt-1 text-xs font-medium text-forest">Profil vérifié</p>
+                  )}
                 </div>
               </Link>
             ))}
@@ -156,19 +153,19 @@ export default async function HomePage() {
       </section>
 
       {/* Comment ça marche */}
-      <section className="mx-auto max-w-6xl px-4 py-14">
-        <p className="text-xs font-bold uppercase tracking-wide text-brand">Comment ça marche ?</p>
-        <h2 className="font-heading mt-1 text-2xl font-bold">Vous gérez vos travaux, nous gérons la sécurité</h2>
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <div className="border-b border-line pb-4">
+          <h2 className="font-heading text-2xl font-medium text-ink">Comment ça marche</h2>
+          <p className="mt-1 text-sm text-ink/60">Vous gérez vos travaux, nous gérons la sécurité.</p>
+        </div>
 
-        <div className="mt-8 grid gap-6 sm:grid-cols-2">
+        <div className="mt-8 grid gap-8 sm:grid-cols-2">
           {STEPS.map((step) => (
-            <div key={step.n} className="flex gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand font-heading text-sm font-bold text-white">
-                {step.n}
-              </div>
+            <div key={step.n} className="flex gap-4">
+              <span className="step-marker text-ink">{String(step.n).padStart(2, "0")}</span>
               <div>
-                <p className="font-heading font-bold">{step.title}</p>
-                <p className="mt-1 text-sm text-gray-500">{step.text}</p>
+                <p className="font-heading font-medium text-ink">{step.title}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-ink/60">{step.text}</p>
               </div>
             </div>
           ))}

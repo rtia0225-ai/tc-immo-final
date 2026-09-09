@@ -35,13 +35,12 @@ export default async function ArtisanProfilePage({ params }) {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
-      {/* Galerie de réalisations, en carrousel (max 5 photos) */}
-      <p className="text-xs font-bold uppercase tracking-wide text-brand">Projets réalisés</p>
+    <div className="mx-auto max-w-3xl px-4 py-14">
+      <p className="text-sm font-medium text-clay">Projets réalisés</p>
       <PhotoCarousel photos={photos} />
 
-      {/* Identité et infos clés */}
-      <div className="mt-6 flex items-start gap-4">
+      {/* Identité */}
+      <div className="mt-8 flex items-start gap-4 border-b border-line pb-8">
         {artisan.profiles?.avatar_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -50,63 +49,64 @@ export default async function ArtisanProfilePage({ params }) {
             className="h-16 w-16 shrink-0 rounded-full object-cover"
           />
         ) : (
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gray-100 font-heading text-lg font-bold text-gray-400">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-line font-heading text-lg text-ink/40">
             {artisan.profiles?.full_name?.slice(0, 2).toUpperCase()}
           </div>
         )}
         <div>
-          <h1 className="font-heading text-2xl font-bold">{artisan.profiles?.full_name}</h1>
-          <p className="text-sm text-brand">{artisan.trade}</p>
-          <p className="mt-1 flex items-center gap-1 text-sm text-gray-500">
-            📍 {artisan.profiles?.city || "Côte d'Ivoire"}
+          <h1 className="font-heading text-2xl font-medium text-ink">{artisan.profiles?.full_name}</h1>
+          <p className="mt-0.5 text-sm text-ink/60">
+            {artisan.trade} · {artisan.profiles?.city || "Côte d'Ivoire"}
+          </p>
+          {artisan.is_verified && (
+            <p className="mt-1 text-xs font-medium text-forest">Profil vérifié</p>
+          )}
+        </div>
+      </div>
+
+      {/* Chiffres clés */}
+      <div className="grid grid-cols-2 gap-6 border-b border-line py-6 sm:grid-cols-3">
+        <div>
+          <p className="text-xs text-ink/40">Expérience</p>
+          <p className="font-heading text-lg text-ink">{artisan.years_experience || 0} ans</p>
+        </div>
+        <div>
+          <p className="text-xs text-ink/40">Projets réalisés</p>
+          <p className="font-heading text-lg text-ink">{artisan.projects_completed || 0}</p>
+        </div>
+        <div>
+          <p className="text-xs text-ink/40">Zone d'intervention</p>
+          <p className="mt-0.5 text-sm text-ink">
+            {artisan.mobility_scope === "all"
+              ? "Toute la Côte d'Ivoire"
+              : artisan.mobility_cities && artisan.mobility_cities.length > 0
+                ? artisan.mobility_cities.join(", ")
+                : "Non précisée"}
           </p>
         </div>
       </div>
 
-      <div className="mt-2">
-
-        {/* Mobilité */}
-        <p className="mt-2 text-sm text-gray-600">
-          🚗 {artisan.mobility_scope === "all"
-            ? "Disponible partout en Côte d'Ivoire"
-            : artisan.mobility_cities && artisan.mobility_cities.length > 0
-              ? `Intervient à : ${artisan.mobility_cities.join(", ")}`
-              : "Zone d'intervention non précisée"}
-        </p>
-
-        {/* Disponibilités */}
+      <div className="border-b border-line py-6">
         {artisan.availability_days && artisan.availability_days.length > 0 && (
-          <p className="mt-1 text-sm text-gray-600">
-            🗓️ Disponible : {artisan.availability_days.join(", ")}
-          </p>
+          <div className="mb-5">
+            <p className="text-xs text-ink/40">Disponibilités</p>
+            <p className="mt-0.5 text-sm text-ink">{artisan.availability_days.join(", ")}</p>
+          </div>
         )}
 
-        <div className="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
-          <div>
-            <p className="text-gray-400">Expérience</p>
-            <p className="font-semibold">{artisan.years_experience || 0} années</p>
-          </div>
-          <div>
-            <p className="text-gray-400">Projets réalisés</p>
-            <p className="font-semibold">{artisan.projects_completed || 0}</p>
-          </div>
-        </div>
-
-        {/* Tarification */}
         {artisan.pricing_info && (
-          <div className="mt-4">
-            <p className="text-sm font-semibold text-gray-700">Tarification</p>
-            <p className="mt-1 text-sm text-gray-600">{artisan.pricing_info}</p>
+          <div className="mb-5">
+            <p className="text-xs text-ink/40">Tarification</p>
+            <p className="mt-0.5 text-sm text-ink">{artisan.pricing_info}</p>
           </div>
         )}
 
-        {/* Services compris */}
         {artisan.services && artisan.services.length > 0 && (
-          <div className="mt-4">
-            <p className="text-sm font-semibold text-gray-700">Services proposés</p>
-            <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mb-5">
+            <p className="text-xs text-ink/40">Services proposés</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
               {artisan.services.map((s) => (
-                <span key={s} className="rounded-full bg-forest-light px-3 py-1 text-xs font-medium text-forest">
+                <span key={s} className="border border-line px-2 py-0.5 text-xs text-ink/70">
                   {s}
                 </span>
               ))}
@@ -114,40 +114,39 @@ export default async function ArtisanProfilePage({ params }) {
           </div>
         )}
 
-        {/* Pourquoi moi */}
         {artisan.bio && (
-          <div className="mt-4">
-            <p className="text-sm font-semibold text-gray-700">Pourquoi moi</p>
-            <p className="mt-1 text-sm text-gray-600">{artisan.bio}</p>
+          <div>
+            <p className="text-xs text-ink/40">Pourquoi moi</p>
+            <p className="mt-1 text-sm leading-relaxed text-ink/80">{artisan.bio}</p>
           </div>
         )}
       </div>
 
-      {/* Actions : toujours visibles, redirection vers connexion si besoin */}
-      <div className="mt-6 grid gap-2 sm:grid-cols-3">
+      {/* Actions */}
+      <div className="grid gap-2 py-6 sm:grid-cols-3">
         <Link
           href={`/appointments/new?artisan=${artisan.id}`}
-          className="rounded-lg bg-brand px-4 py-2 text-center text-sm font-semibold text-white hover:bg-brand-dark"
+          className="bg-ink px-4 py-3 text-center text-sm font-medium text-stone hover:bg-black"
         >
-          Prendre un RDV visio
+          Rendez-vous visio
         </Link>
         <Link
           href={`/messages/new?artisan=${artisan.id}`}
-          className="rounded-lg border border-brand px-4 py-2 text-center text-sm font-semibold text-brand hover:bg-brand-light"
+          className="border border-ink px-4 py-3 text-center text-sm font-medium text-ink hover:bg-ink hover:text-stone"
         >
-          Discuter par message
+          Message
         </Link>
         <Link
           href={`/projects/new?artisan=${artisan.id}`}
-          className="rounded-lg bg-forest px-4 py-2 text-center text-sm font-semibold text-white hover:bg-forest-dark"
+          className="bg-forest px-4 py-3 text-center text-sm font-medium text-white hover:bg-forest-dark"
         >
           Démarrer un projet
         </Link>
       </div>
 
       {/* Avis */}
-      <div className="mt-8">
-        <p className="text-sm font-semibold text-gray-700">Avis</p>
+      <div className="border-t border-line pt-6">
+        <p className="text-xs text-ink/40">Avis</p>
         <div className="mt-3">
           <ReviewList reviews={reviews} />
         </div>

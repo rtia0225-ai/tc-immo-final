@@ -79,7 +79,7 @@ export default async function DashboardPage({ searchParams }) {
               {profile?.full_name?.slice(0, 2).toUpperCase()}
             </div>
             <div>
-              <p className="font-heading font-bold">Bonjour, {profile?.full_name} 👋</p>
+              <p className="font-heading font-bold">Bonjour, {profile?.full_name}</p>
               <p className="text-xs text-white/70">Compte {isArtisan ? "artisan" : "client"}</p>
             </div>
           </div>
