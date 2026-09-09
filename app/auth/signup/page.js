@@ -1,5 +1,6 @@
 import { signup } from "../actions";
 import Link from "next/link";
+import { CONSTRUCTION_SERVICES } from "@/lib/constants";
 
 export default function SignupPage({ searchParams }) {
   const role = searchParams?.role; // 'client' ou 'artisan', choisi à l'étape précédente
@@ -64,12 +65,16 @@ export default function SignupPage({ searchParams }) {
 
         {role === "artisan" && (
           <div>
-            <label className="mb-1 block text-sm font-medium">Métier</label>
-            <input
-              name="trade"
-              placeholder="ex: Plombier, Maçon, Architecte"
-              className="w-full rounded-lg border border-gray-300 p-2"
-            />
+            <label className="mb-1 block text-sm font-medium">Métier principal</label>
+            <select name="trade" required defaultValue="" className="w-full rounded-lg border border-gray-300 p-2">
+              <option value="" disabled>Choisir un métier</option>
+              {CONSTRUCTION_SERVICES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-gray-500">
+              Tu pourras préciser tous tes autres services depuis ton profil après inscription.
+            </p>
           </div>
         )}
 

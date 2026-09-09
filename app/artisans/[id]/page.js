@@ -9,8 +9,9 @@ export default async function ArtisanProfilePage({ params }) {
   const { data: artisan } = await supabase
     .from("artisan_profiles")
     .select(
-      `id, trade, bio, years_experience, is_verified, hourly_rate, currency,
-       services, projects_completed,
+      `id, trade, bio, years_experience, is_verified, pricing_info,
+       services, projects_completed, mobility_scope, mobility_cities,
+       availability_days,
        profiles ( full_name, city, avatar_url )`
     )
     .eq("id", id)
@@ -26,10 +27,6 @@ export default async function ArtisanProfilePage({ params }) {
     .select("id, rating, comment, profiles ( full_name )")
     .eq("artisan_id", id)
     .order("created_at", { ascending: false });
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   if (!artisan) {
     return <p className="px-4 py-12">Artisan introuvable.</p>;
@@ -65,27 +62,45 @@ export default async function ArtisanProfilePage({ params }) {
           📍 {artisan.profiles?.city || "Côte d'Ivoire"}
         </p>
 
+        {/* Mobilité */}
+        <p className="mt-2 text-sm text-gray-600">
+          🚗 {artisan.mobility_scope === "all"
+            ? "Disponible partout en Côte d'Ivoire"
+            : artisan.mobility_cities && artisan.mobility_cities.length > 0
+              ? `Intervient à : ${artisan.mobility_cities.join(", ")}`
+              : "Zone d'intervention non précisée"}
+        </p>
+
+        {/* Disponibilités */}
+        {artisan.availability_days && artisan.availability_days.length > 0 && (
+          <p className="mt-1 text-sm text-gray-600">
+            🗓️ Disponible : {artisan.availability_days.join(", ")}
+          </p>
+        )}
+
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
           <div>
             <p className="text-gray-400">Expérience</p>
             <p className="font-semibold">{artisan.years_experience || 0} années</p>
           </div>
-          {artisan.hourly_rate && (
-            <div>
-              <p className="text-gray-400">Tarif indicatif</p>
-              <p className="font-semibold">{artisan.hourly_rate} {artisan.currency}</p>
-            </div>
-          )}
           <div>
             <p className="text-gray-400">Projets réalisés</p>
             <p className="font-semibold">{artisan.projects_completed || 0}</p>
           </div>
         </div>
 
+        {/* Tarification */}
+        {artisan.pricing_info && (
+          <div className="mt-4">
+            <p className="text-sm font-semibold text-gray-700">Tarification</p>
+            <p className="mt-1 text-sm text-gray-600">{artisan.pricing_info}</p>
+          </div>
+        )}
+
         {/* Services compris */}
         {artisan.services && artisan.services.length > 0 && (
           <div className="mt-4">
-            <p className="text-sm font-semibold text-gray-700">Services compris</p>
+            <p className="text-sm font-semibold text-gray-700">Services proposés</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {artisan.services.map((s) => (
                 <span key={s} className="rounded-full bg-forest-light px-3 py-1 text-xs font-medium text-forest">
@@ -105,9 +120,7 @@ export default async function ArtisanProfilePage({ params }) {
         )}
       </div>
 
-      {/* Actions : toujours visibles. Si la personne n'est pas connectée,
-          les pages de destination la renvoient vers la connexion puis la
-          ramènent automatiquement ici une fois connectée. */}
+      {/* Actions : toujours visibles, redirection vers connexion si besoin */}
       <div className="mt-6 grid gap-2 sm:grid-cols-3">
         <Link
           href={`/appointments/new?artisan=${artisan.id}`}

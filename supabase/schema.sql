@@ -383,3 +383,18 @@ drop trigger if exists on_auth_user_auto_confirm on auth.users;
 create trigger on_auth_user_auto_confirm
   before insert on auth.users
   for each row execute function public.auto_confirm_email();
+
+-- ---------------------------------------------------------
+-- 11. DÉTAILS DE PROFIL ARTISAN (mobilité, tarification, disponibilités)
+-- ---------------------------------------------------------
+create type mobility_scope as enum ('all', 'selected');
+
+alter table artisan_profiles add column if not exists mobility_scope mobility_scope default 'selected';
+alter table artisan_profiles add column if not exists mobility_cities text[] default '{}';
+alter table artisan_profiles add column if not exists pricing_info text;
+alter table artisan_profiles add column if not exists availability_days text[] default '{}';
+
+-- Informations personnelles privées, jamais visibles du client,
+-- utilisées pour la vérification du profil.
+alter table profiles add column if not exists emergency_contact_name text;
+alter table profiles add column if not exists emergency_contact_phone text;

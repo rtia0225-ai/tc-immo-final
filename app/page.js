@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import TrustBanner from "@/components/TrustBanner";
+import { CI_CITIES, CONSTRUCTION_SERVICES } from "@/lib/constants";
 
 const STEPS = [
   {
@@ -61,11 +62,12 @@ export default async function HomePage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Artisans</label>
-              <input
-                name="trade"
-                placeholder="Ex : Architecte, Maçon..."
-                className="mt-1 w-full rounded-lg border border-gray-200 p-2 text-sm text-gray-800"
-              />
+              <select name="trade" defaultValue="" className="mt-1 w-full rounded-lg border border-gray-200 p-2 text-sm text-gray-800">
+                <option value="">Tous les métiers</option>
+                {CONSTRUCTION_SERVICES.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Type de maison</label>
@@ -77,11 +79,12 @@ export default async function HomePage() {
             </div>
             <div>
               <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Ville</label>
-              <input
-                name="city"
-                placeholder="Ex : Cocody, Marcory..."
-                className="mt-1 w-full rounded-lg border border-gray-200 p-2 text-sm text-gray-800"
-              />
+              <select name="city" defaultValue="" className="mt-1 w-full rounded-lg border border-gray-200 p-2 text-sm text-gray-800">
+                <option value="">Toutes les villes</option>
+                {CI_CITIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Recommandation</label>

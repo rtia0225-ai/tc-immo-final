@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { CI_CITIES, CONSTRUCTION_SERVICES } from "@/lib/constants";
 
 export default async function ArtisansPage({ searchParams }) {
   const supabase = createClient();
@@ -8,25 +9,30 @@ export default async function ArtisansPage({ searchParams }) {
   // capturés mais pas encore reliés à une colonne dédiée — à affiner une fois
   // qu'on décide comment les modéliser (ex: tags projet, seuil d'avis).
 
-  let query = supabase
+  const { data: allArtisans } = await supabase
     .from("artisan_profiles")
     .select(
-      `id, trade, bio, years_experience, is_verified, hourly_rate, currency,
-       services, projects_completed,
+      `id, trade, bio, years_experience, is_verified, pricing_info,
+       services, projects_completed, mobility_scope, mobility_cities,
        profiles ( full_name, city, avatar_url )`
     )
     .order("is_verified", { ascending: false });
 
-  if (trade) query = query.ilike("trade", `%${trade}%`);
+  const artisans = (allArtisans || []).filter((a) => {
+    // Métier : correspond au métier principal OU à l'un des services proposés
+    const matchesTrade =
+      !trade || a.trade === trade || (a.services || []).includes(trade);
 
-  const { data: allArtisans } = await query;
+    // Ville : correspond à sa ville de base, à sa zone de mobilité déclarée,
+    // ou il est disponible partout en Côte d'Ivoire
+    const matchesCity =
+      !city ||
+      a.profiles?.city === city ||
+      a.mobility_scope === "all" ||
+      (a.mobility_cities || []).includes(city);
 
-  // Filtre sur la ville côté application (car c'est un champ de la table liée `profiles`)
-  const artisans = city
-    ? (allArtisans || []).filter((a) =>
-        a.profiles?.city?.toLowerCase().includes(city.toLowerCase())
-      )
-    : allArtisans;
+    return matchesTrade && matchesCity;
+  });
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -34,24 +40,24 @@ export default async function ArtisansPage({ searchParams }) {
 
       {/* Barre de recherche, reprend les mêmes critères que l'accueil */}
       <form action="/artisans" className="mt-4 flex flex-wrap gap-2">
-        <input
-          name="trade"
-          defaultValue={trade || ""}
-          placeholder="Métier (ex: Maçon)"
-          className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
-        />
-        <input
-          name="city"
-          defaultValue={city || ""}
-          placeholder="Ville (ex: Cocody)"
-          className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
-        />
+        <select name="trade" defaultValue={trade || ""} className="flex-1 rounded-lg border border-gray-300 p-2 text-sm">
+          <option value="">Tous les métiers</option>
+          {CONSTRUCTION_SERVICES.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        <select name="city" defaultValue={city || ""} className="flex-1 rounded-lg border border-gray-300 p-2 text-sm">
+          <option value="">Toutes les villes</option>
+          {CI_CITIES.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
         <button type="submit" className="rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
           Filtrer
         </button>
       </form>
 
-      {!artisans || artisans.length === 0 ? (
+      {artisans.length === 0 ? (
         <p className="mt-8 text-gray-500">Aucun artisan ne correspond à ta recherche.</p>
       ) : (
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -71,6 +77,7 @@ export default async function ArtisansPage({ searchParams }) {
                   <p className="font-heading font-bold">{a.profiles?.full_name}</p>
                   <p className="mt-1 flex items-center gap-1 text-xs text-gray-500">
                     📍 {a.profiles?.city || "Côte d'Ivoire"}
+                    {a.mobility_scope === "all" && " · Toute la CI"}
                   </p>
                 </div>
               </div>
