@@ -6,7 +6,7 @@ export default function ProjectTimeline({
   isArtisan,
 }) {
   return (
-    <div className="rounded-xl border border-brand-light bg-white p-5">
+    <div className="rounded-lg border border-brand-light bg-white p-5">
       <h2 className="mb-3 font-semibold">Espace de suivi général</h2>
 
       {!milestones || milestones.length === 0 ? (

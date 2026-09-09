@@ -28,7 +28,7 @@ export default async function LiveFeedPage({ params }) {
           Aucun flux caméra configuré pour ce projet pour le moment.
         </p>
       ) : feed.is_live && feed.playback_url ? (
-        <div className="aspect-video overflow-hidden rounded-xl bg-black">
+        <div className="aspect-video overflow-hidden rounded-lg bg-black">
           {/* Remplacer par le lecteur HLS de ton prestataire (ex: hls.js,
               Mux Player, ou un simple <iframe src={feed.playback_url} />) */}
           <video
@@ -40,7 +40,7 @@ export default async function LiveFeedPage({ params }) {
           />
         </div>
       ) : (
-        <div className="flex aspect-video items-center justify-center rounded-xl bg-gray-100 text-gray-500">
+        <div className="flex aspect-video items-center justify-center rounded-lg bg-gray-100 text-gray-500">
           Le chantier n'est pas en direct actuellement.
         </div>
       )}

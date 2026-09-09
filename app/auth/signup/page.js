@@ -16,20 +16,20 @@ export default function SignupPage({ searchParams }) {
         <div className="mt-4 flex w-full max-w-sm flex-col gap-4">
           <Link
             href={`/auth/signup?role=client${qs}`}
-            className="rounded-xl bg-forest py-4 font-heading font-bold text-white hover:bg-forest-dark"
+            className="rounded-lg bg-forest py-4 font-heading font-bold text-white hover:bg-forest-dark"
           >
             Je veux construire une maison
           </Link>
           <Link
             href={`/auth/signup?role=artisan${qs}`}
-            className="rounded-xl bg-brand py-4 font-heading font-bold text-white hover:bg-brand-dark"
+            className="rounded-lg bg-brand py-4 font-heading font-bold text-white hover:bg-brand-dark"
           >
             Je suis un artisan
           </Link>
           <p className="text-sm text-gray-500">Ou</p>
           <Link
             href={redirectTo ? `/auth/login?redirect=${encodeURIComponent(redirectTo)}` : "/auth/login"}
-            className="rounded-xl border-2 border-brand py-3 font-heading font-semibold text-brand hover:bg-brand-light"
+            className="rounded-lg border-2 border-brand py-3 font-heading font-semibold text-brand hover:bg-brand-light"
           >
             Connexion
           </Link>

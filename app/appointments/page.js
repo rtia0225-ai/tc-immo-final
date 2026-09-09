@@ -47,7 +47,7 @@ export default async function AppointmentsPage() {
           {appointments.map((a) => (
             <div
               key={a.id}
-              className="rounded-xl border border-brand-light bg-white p-5"
+              className="rounded-lg border border-brand-light bg-white p-5"
             >
               <div className="mb-2 flex items-center justify-between">
                 <span className="font-medium">

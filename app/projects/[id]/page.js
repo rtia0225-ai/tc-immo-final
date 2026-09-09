@@ -59,7 +59,7 @@ export default async function ProjectPage({ params }) {
       <p className="mb-6 text-gray-600">{project.description}</p>
 
       {/* Paiements (escrow) */}
-      <div className="mb-6 rounded-xl border border-brand-light bg-white p-5">
+      <div className="mb-6 rounded-lg border border-brand-light bg-white p-5">
         <h2 className="mb-3 font-semibold">Mes paiements</h2>
         <EscrowStatus
           status={project.status}

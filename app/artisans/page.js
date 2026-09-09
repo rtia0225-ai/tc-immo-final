@@ -47,45 +47,45 @@ export default async function ArtisansPage({ searchParams }) {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="font-heading text-3xl font-extrabold text-ink">Trouver un artisan</h1>
+      <h1 className="font-heading text-2xl font-bold text-ink">Trouver un artisan</h1>
 
-      <form action="/artisans" className="mt-6 flex flex-wrap gap-3 rounded-2xl bg-white p-4 shadow-card">
-        <select name="trade" defaultValue={trade || ""} className="flex-1 rounded-xl border border-gray-200 p-2.5 text-sm hover:border-brand focus:border-brand focus:outline-none">
+      <form action="/artisans" className="mt-6 grid gap-px overflow-hidden rounded-lg border border-gray-200 bg-gray-200 sm:grid-cols-4">
+        <select name="trade" defaultValue={trade || ""} className="bg-white p-3 text-sm text-ink focus:outline-none">
           <option value="">Tous les métiers</option>
           {CONSTRUCTION_SERVICES.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-        <select name="city" defaultValue={city || ""} className="flex-1 rounded-xl border border-gray-200 p-2.5 text-sm hover:border-brand focus:border-brand focus:outline-none">
+        <select name="city" defaultValue={city || ""} className="bg-white p-3 text-sm text-ink focus:outline-none">
           <option value="">Toutes les villes</option>
           {CI_CITIES.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
-        <select name="recommendation" defaultValue={recommendation || ""} className="flex-1 rounded-xl border border-gray-200 p-2.5 text-sm hover:border-brand focus:border-brand focus:outline-none">
+        <select name="recommendation" defaultValue={recommendation || ""} className="bg-white p-3 text-sm text-ink focus:outline-none">
           <option value="">Toute la liste</option>
           {RECOMMENDATION_OPTIONS.map((r) => (
             <option key={r.value} value={r.value}>{r.label}</option>
           ))}
         </select>
-        <button type="submit" className="rounded-xl bg-brand px-6 py-2.5 text-sm font-bold text-white shadow-glow hover:-translate-y-0.5 hover:bg-brand-dark">
+        <button type="submit" className="bg-brand text-sm font-bold text-white hover:bg-brand-dark">
           Filtrer
         </button>
       </form>
 
       {recommendation === "top3" && (
-        <p className="mt-4 text-sm font-medium text-gold">★ Nos 3 recommandations les plus expérimentées</p>
+        <p className="mt-4 text-sm text-gray-500">Nos 3 recommandations les plus expérimentées.</p>
       )}
 
       {artisans.length === 0 ? (
         <p className="mt-10 text-gray-500">Aucun artisan ne correspond à ta recherche.</p>
       ) : (
-        <div className="mt-8 grid gap-5 sm:grid-cols-2">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {artisans.map((a) => (
             <Link
               key={a.id}
               href={`/artisans/${a.id}`}
-              className="rounded-2xl bg-white p-5 shadow-card hover:-translate-y-1 hover:shadow-card-hover"
+              className="rounded-lg border border-gray-200 bg-white p-5 hover:shadow-md"
             >
               <div className="flex items-start gap-3">
                 {a.profiles?.avatar_url ? (
@@ -93,20 +93,22 @@ export default async function ArtisansPage({ searchParams }) {
                   <img
                     src={a.profiles.avatar_url}
                     alt={a.profiles?.full_name}
-                    className="h-14 w-14 shrink-0 rounded-full object-cover ring-2 ring-forest-light"
+                    className="h-12 w-12 shrink-0 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-forest-light to-gold-light font-heading text-sm font-bold text-forest">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gray-50 font-heading text-sm font-bold text-gray-300">
                     {a.profiles?.full_name?.slice(0, 2).toUpperCase()}
                   </div>
                 )}
-                <div>
-                  {a.is_verified && (
-                    <span className="mb-1 inline-flex items-center gap-1 rounded-full bg-forest-light px-2 py-0.5 text-[10px] font-bold text-forest">
-                      ✓ Vérifié
-                    </span>
-                  )}
-                  <p className="font-heading font-bold text-ink">{a.profiles?.full_name}</p>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="font-heading font-bold text-ink">{a.profiles?.full_name}</p>
+                    {a.is_verified && (
+                      <span className="rounded bg-forest px-1.5 py-0.5 text-[10px] font-bold text-white">
+                        Vérifié
+                      </span>
+                    )}
+                  </div>
                   <p className="mt-0.5 text-xs text-gray-500">
                     {a.trade} · {a.profiles?.city || "Côte d'Ivoire"}
                     {a.mobility_scope === "all" && " · Toute la CI"}
@@ -117,7 +119,7 @@ export default async function ArtisansPage({ searchParams }) {
               {a.services && a.services.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {a.services.map((s) => (
-                    <span key={s} className="rounded-full bg-azure-light px-2.5 py-0.5 text-[11px] font-medium text-azure-dark">
+                    <span key={s} className="rounded bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600">
                       {s}
                     </span>
                   ))}
@@ -126,7 +128,7 @@ export default async function ArtisansPage({ searchParams }) {
 
               <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3 text-sm">
                 <span className="text-gray-500">{a.projects_completed || 0} projets réalisés</span>
-                <span className="font-bold text-brand">Voir le profil →</span>
+                <span className="font-bold text-brand">Voir le profil</span>
               </div>
             </Link>
           ))}

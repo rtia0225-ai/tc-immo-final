@@ -72,7 +72,7 @@ export default async function DashboardPage({ searchParams }) {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       {/* Bandeau d'accueil avec indicateurs */}
-      <div className="rounded-2xl bg-forest p-6 text-white">
+      <div className="rounded-lg bg-forest p-6 text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand font-heading font-bold">
@@ -95,16 +95,16 @@ export default async function DashboardPage({ searchParams }) {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-xl bg-white/10 py-3">
+        <div className="mt-6 grid grid-cols-3 divide-x divide-white/20 border-t border-white/20 pt-4 text-center">
+          <div>
             <p className="font-heading text-xl font-bold">{projetsEnCours}</p>
             <p className="text-[11px] text-white/70">Projet en cours</p>
           </div>
-          <div className="rounded-xl bg-white/10 py-3">
+          <div>
             <p className="font-heading text-xl font-bold">{avancement}%</p>
             <p className="text-[11px] text-white/70">Avancement</p>
           </div>
-          <div className="rounded-xl bg-white/10 py-3">
+          <div>
             <p className="font-heading text-xl font-bold">{etapesValidees}/{totalEtapes}</p>
             <p className="text-[11px] text-white/70">Étapes validées</p>
           </div>
@@ -130,7 +130,7 @@ export default async function DashboardPage({ searchParams }) {
         {activeTab === "projets" && (
           <>
             {activeProject ? (
-              <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+              <div className="rounded-lg border border-gray-200 bg-white p-5">
                 <div className="flex items-center justify-between">
                   <p className="font-heading font-bold">{activeProject.title}</p>
                   <Link
