@@ -106,32 +106,36 @@ export async function addArtisanPhoto(formData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
-  const file = formData.get("photo");
+  const files = formData.getAll("photo").filter((f) => typeof f !== "string" && f.size > 0);
   const caption = formData.get("caption");
 
-  if (!file || typeof file === "string" || file.size === 0) {
+  if (files.length === 0) {
     redirect("/dashboard/profile?error=Aucune+photo+sélectionnée");
   }
 
-  const ext = file.name.split(".").pop() || "jpg";
-  const path = `${user.id}/${Date.now()}.${ext}`;
-  const arrayBuffer = await file.arrayBuffer();
+  for (const file of files) {
+    const ext = file.name.split(".").pop() || "jpg";
+    // Un identifiant unique par fichier pour éviter que plusieurs photos
+    // envoyées à la même seconde ne s'écrasent entre elles.
+    const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const arrayBuffer = await file.arrayBuffer();
 
-  const { error: uploadError } = await supabase.storage
-    .from("artisan-photos")
-    .upload(path, arrayBuffer, { contentType: file.type });
+    const { error: uploadError } = await supabase.storage
+      .from("artisan-photos")
+      .upload(path, arrayBuffer, { contentType: file.type });
 
-  if (uploadError) {
-    redirect(`/dashboard/profile?error=${encodeURIComponent(uploadError.message)}`);
+    if (uploadError) {
+      redirect(`/dashboard/profile?error=${encodeURIComponent(uploadError.message)}`);
+    }
+
+    const { data: publicUrlData } = supabase.storage.from("artisan-photos").getPublicUrl(path);
+
+    await supabase.from("artisan_photos").insert({
+      artisan_id: user.id,
+      photo_url: publicUrlData.publicUrl,
+      caption: caption?.trim() || null,
+    });
   }
-
-  const { data: publicUrlData } = supabase.storage.from("artisan-photos").getPublicUrl(path);
-
-  await supabase.from("artisan_photos").insert({
-    artisan_id: user.id,
-    photo_url: publicUrlData.publicUrl,
-    caption: caption?.trim() || null,
-  });
 
   redirect("/dashboard/profile?success=1");
 }

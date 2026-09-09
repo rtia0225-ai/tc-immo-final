@@ -313,12 +313,13 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
             type="file"
             name="photo"
             accept="image/*"
+            multiple
             required
             className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
           />
           <input
             name="caption"
-            placeholder="Légende (optionnel)"
+            placeholder="Légende (optionnel, appliquée à toutes)"
             className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
           />
           <button type="submit" className="rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-white hover:bg-forest-dark">
@@ -326,7 +327,7 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
           </button>
         </form>
         <p className="mt-2 text-xs text-gray-500">
-          Choisis une photo directement depuis ton téléphone ou ton ordinateur.
+          Choisis une ou plusieurs photos directement depuis ton téléphone ou ton ordinateur (maintiens Ctrl/Cmd pour en sélectionner plusieurs).
         </p>
       </section>
     </div>
