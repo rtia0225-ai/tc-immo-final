@@ -67,7 +67,6 @@ export async function updateArtisanProfile(formData) {
   const pricingInfo = formData.get("pricingInfo");
   const mobilityScope = formData.get("mobilityScope"); // 'all' ou 'selected'
   const mobilityCities = formData.getAll("mobilityCities");
-  const availabilityDays = formData.getAll("availabilityDays");
 
   await supabase
     .from("artisan_profiles")
@@ -79,7 +78,6 @@ export async function updateArtisanProfile(formData) {
       pricing_info: pricingInfo,
       mobility_scope: mobilityScope,
       mobility_cities: mobilityScope === "selected" ? mobilityCities : [],
-      availability_days: availabilityDays,
     })
     .eq("id", user.id);
 

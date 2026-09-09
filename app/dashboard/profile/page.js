@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { updateArtisanProfile, addArtisanPhoto, deleteArtisanPhoto, uploadAvatar } from "./actions";
-import { CI_CITIES, CONSTRUCTION_SERVICES, DAYS_OF_WEEK } from "@/lib/constants";
+import { CI_CITIES, CONSTRUCTION_SERVICES } from "@/lib/constants";
 import ShareLocationButton from "@/components/ShareLocationButton";
 
 export default async function ArtisanProfileEditPage({ searchParams }) {
@@ -35,7 +35,6 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
 
   const selectedServices = artisan?.services || [];
   const selectedMobilityCities = artisan?.mobility_cities || [];
-  const selectedDays = artisan?.availability_days || [];
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
@@ -270,23 +269,6 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
                 placeholder="ex: 25 000 XOF / jour, ou sur devis par contrat"
                 className="w-full rounded-lg border border-gray-300 p-2"
               />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium">Disponibilités (jours types de la semaine)</label>
-              <div className="flex flex-wrap gap-3">
-                {DAYS_OF_WEEK.map((d) => (
-                  <label key={d} className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      name="availabilityDays"
-                      value={d}
-                      defaultChecked={selectedDays.includes(d)}
-                    />
-                    {d}
-                  </label>
-                ))}
-              </div>
             </div>
           </div>
         </section>

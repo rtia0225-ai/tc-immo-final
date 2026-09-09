@@ -26,6 +26,7 @@ export async function requestAppointment(formData) {
       scheduled_at: new Date(scheduledAt).toISOString(),
       notes,
       status: "proposed",
+      proposed_by: user.id,
     })
     .select("id")
     .single();
@@ -42,7 +43,9 @@ export async function requestAppointment(formData) {
   redirect("/appointments");
 }
 
-// L'artisan confirme le RDV et peut y joindre un lien de réunion (Meet, Zoom...)
+// Accepte le créneau tel que proposé par l'autre partie, et peut y joindre
+// un lien de réunion (Meet, Zoom...). Accessible à qui N'A PAS proposé
+// ce créneau — client ou artisan, selon le sens de la dernière proposition.
 export async function confirmAppointment(formData) {
   const supabase = createClient();
   const appointmentId = formData.get("appointmentId");
@@ -60,7 +63,36 @@ export async function confirmAppointment(formData) {
       meeting_link: meetingLink || null,
     })
     .eq("id", appointmentId)
-    .eq("artisan_id", user.id);
+    .or(`client_id.eq.${user.id},artisan_id.eq.${user.id}`)
+    .neq("proposed_by", user.id);
+
+  redirect("/appointments");
+}
+
+// Contre-proposition : client ou artisan propose une autre date/heure.
+// Remet le rendez-vous en attente de confirmation par l'autre partie.
+export async function proposeNewTime(formData) {
+  const supabase = createClient();
+  const appointmentId = formData.get("appointmentId");
+  const scheduledAt = formData.get("scheduledAt");
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/auth/login");
+
+  await supabase
+    .from("appointments")
+    .update({
+      scheduled_at: new Date(scheduledAt).toISOString(),
+      status: "proposed",
+      proposed_by: user.id,
+      meeting_link: null,
+    })
+    .eq("id", appointmentId)
+    .or(`client_id.eq.${user.id},artisan_id.eq.${user.id}`);
+
+  await notifyNewAppointment(appointmentId);
 
   redirect("/appointments");
 }

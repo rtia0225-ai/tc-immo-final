@@ -492,3 +492,8 @@ create policy "envoyer sa propre note vocale" on storage.objects
   for insert with check (
     bucket_id = 'voice-notes' and (storage.foldername(name))[1] = auth.uid()::text
   );
+
+-- ---------------------------------------------------------
+-- 16. NÉGOCIATION DE RENDEZ-VOUS (contre-propositions)
+-- ---------------------------------------------------------
+alter table appointments add column if not exists proposed_by uuid references profiles(id);

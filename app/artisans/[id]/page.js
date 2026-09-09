@@ -12,7 +12,6 @@ export default async function ArtisanProfilePage({ params }) {
     .select(
       `id, trade, bio, years_experience, is_verified, pricing_info,
        services, projects_completed, mobility_scope, mobility_cities,
-       availability_days,
        profiles ( full_name, city, avatar_url )`
     )
     .eq("id", id)
@@ -90,13 +89,6 @@ export default async function ArtisanProfilePage({ params }) {
       </div>
 
       <div className="mt-4 rounded-lg border border-gray-200 bg-white p-6">
-        {artisan.availability_days && artisan.availability_days.length > 0 && (
-          <div className="mb-5">
-            <p className="text-xs font-bold uppercase tracking-wide text-gray-400">Disponibilités</p>
-            <p className="mt-1 text-sm text-ink">{artisan.availability_days.join(", ")}</p>
-          </div>
-        )}
-
         {artisan.pricing_info && (
           <div className="mb-5">
             <p className="text-xs font-bold uppercase tracking-wide text-gray-400">Tarification</p>
