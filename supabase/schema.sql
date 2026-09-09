@@ -398,3 +398,28 @@ alter table artisan_profiles add column if not exists availability_days text[] d
 -- utilisées pour la vérification du profil.
 alter table profiles add column if not exists emergency_contact_name text;
 alter table profiles add column if not exists emergency_contact_phone text;
+
+-- ---------------------------------------------------------
+-- 12. STATISTIQUES DE RECHERCHE (usage interne uniquement)
+-- Journal des recherches clients : type de maison, métier, ville,
+-- recommandation. Sert à identifier les besoins en spécialités selon
+-- le type de construction (ex: géotechniciens pour les immeubles élevés).
+-- N'affecte jamais les résultats affichés au client.
+-- ---------------------------------------------------------
+create table search_analytics (
+  id uuid primary key default uuid_generate_v4(),
+  house_type text,
+  trade text,
+  city text,
+  recommendation text,
+  searched_by uuid references profiles(id) on delete set null,
+  created_at timestamptz default now()
+);
+
+alter table search_analytics enable row level security;
+
+create policy "personne ne lit les analytics" on search_analytics
+  for select using (false);
+
+create policy "tout le monde peut logger une recherche" on search_analytics
+  for insert with check (true);

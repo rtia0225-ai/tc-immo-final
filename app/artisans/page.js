@@ -4,9 +4,25 @@ import { CI_CITIES, CONSTRUCTION_SERVICES, RECOMMENDATION_OPTIONS } from "@/lib/
 
 export default async function ArtisansPage({ searchParams }) {
   const supabase = createClient();
-  const { trade, city, recommendation } = searchParams || {};
-  // Note : "type de maison" est capturé mais pas encore relié à un critère
-  // de filtrage (aucun champ artisan n'y correspond pour l'instant).
+  const { trade, city, recommendation, house_type } = searchParams || {};
+
+  // Le "type de maison" ne filtre jamais les résultats : par défaut, un
+  // artisan est considéré comme capable de traiter tous les types de
+  // construction. On l'enregistre uniquement à des fins statistiques
+  // internes (identifier les besoins en spécialités selon le type de
+  // bien recherché).
+  if (house_type) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    await supabase.from("search_analytics").insert({
+      house_type,
+      trade: trade || null,
+      city: city || null,
+      recommendation: recommendation || null,
+      searched_by: user?.id || null,
+    });
+  }
 
   const { data: allArtisans } = await supabase
     .from("artisan_profiles")
