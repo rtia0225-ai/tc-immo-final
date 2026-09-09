@@ -1,7 +1,9 @@
-import { startConversation } from "../actions";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
+// Pas de page intermédiaire : dès que la personne clique "Discuter par
+// message" depuis un profil artisan, on retrouve (ou on crée) directement
+// la conversation et on atterrit tout de suite dans la messagerie.
 export default async function NewConversationPage({ searchParams }) {
   const artisanId = searchParams?.artisan;
   const supabase = createClient();
@@ -14,20 +16,27 @@ export default async function NewConversationPage({ searchParams }) {
     redirect(`/auth/login?redirect=${encodeURIComponent(currentPath)}`);
   }
 
-  return (
-    <div className="mx-auto max-w-md px-4 py-16 text-center">
-      <h1 className="font-heading mb-4 text-xl font-bold">
-        Démarrer la conversation
-      </h1>
-      <form action={startConversation}>
-        <input type="hidden" name="artisanId" value={artisanId} />
-        <button
-          type="submit"
-          className="rounded-lg bg-brand px-6 py-2 font-medium text-white hover:bg-brand-dark"
-        >
-          Envoyer un premier message
-        </button>
-      </form>
-    </div>
-  );
+  const { data: existing } = await supabase
+    .from("conversations")
+    .select("id")
+    .eq("client_id", user.id)
+    .eq("artisan_id", artisanId)
+    .is("project_id", null)
+    .maybeSingle();
+
+  if (existing) {
+    redirect(`/messages/${existing.id}`);
+  }
+
+  const { data: created, error } = await supabase
+    .from("conversations")
+    .insert({ client_id: user.id, artisan_id: artisanId })
+    .select("id")
+    .single();
+
+  if (error) {
+    redirect(`/artisans/${artisanId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect(`/messages/${created.id}`);
 }

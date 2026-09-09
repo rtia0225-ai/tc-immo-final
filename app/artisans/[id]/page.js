@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import ReviewList from "@/components/ReviewList";
+import PhotoCarousel from "@/components/PhotoCarousel";
 import Link from "next/link";
 
 export default async function ArtisanProfilePage({ params }) {
@@ -20,7 +21,8 @@ export default async function ArtisanProfilePage({ params }) {
   const { data: photos } = await supabase
     .from("artisan_photos")
     .select("id, photo_url, caption")
-    .eq("artisan_id", id);
+    .eq("artisan_id", id)
+    .order("created_at", { ascending: true });
 
   const { data: reviews } = await supabase
     .from("reviews")
@@ -34,25 +36,9 @@ export default async function ArtisanProfilePage({ params }) {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
-      {/* Galerie de réalisations */}
+      {/* Galerie de réalisations, en carrousel (max 5 photos) */}
       <p className="text-xs font-bold uppercase tracking-wide text-brand">Projets réalisés</p>
-      {photos && photos.length > 0 ? (
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          {photos.map((p) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={p.id}
-              src={p.photo_url}
-              alt={p.caption || "Réalisation"}
-              className="h-28 w-full rounded-lg object-cover"
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="mt-3 flex h-36 items-center justify-center rounded-lg bg-gray-100 text-sm text-gray-400">
-          Aucune photo pour le moment
-        </div>
-      )}
+      <PhotoCarousel photos={photos} />
 
       {/* Identité et infos clés */}
       <div className="mt-6 flex items-start gap-4">

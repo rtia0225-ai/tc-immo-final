@@ -291,7 +291,10 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
 
       {/* ------------------------------------------------------ */}
       <section className="mt-10">
-        <h2 className="font-heading text-lg font-bold text-brand">Photos de réalisations</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-lg font-bold text-brand">Photos de réalisations</h2>
+          <span className="text-xs text-gray-500">{photos?.length || 0}/5</span>
+        </div>
 
         {photos && photos.length > 0 && (
           <div className="mt-4 grid grid-cols-3 gap-2">
@@ -308,27 +311,35 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
           </div>
         )}
 
-        <form action={addArtisanPhoto} className="mt-4 flex flex-col gap-2 sm:flex-row">
-          <input
-            type="file"
-            name="photo"
-            accept="image/*"
-            multiple
-            required
-            className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
-          />
-          <input
-            name="caption"
-            placeholder="Légende (optionnel, appliquée à toutes)"
-            className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
-          />
-          <button type="submit" className="rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-white hover:bg-forest-dark">
-            Ajouter
-          </button>
-        </form>
-        <p className="mt-2 text-xs text-gray-500">
-          Choisis une ou plusieurs photos directement depuis ton téléphone ou ton ordinateur (maintiens Ctrl/Cmd pour en sélectionner plusieurs).
-        </p>
+        {(photos?.length || 0) >= 5 ? (
+          <p className="mt-4 text-xs text-gray-500">
+            Maximum de 5 photos atteint. Supprime-en une pour en ajouter une nouvelle.
+          </p>
+        ) : (
+          <>
+            <form action={addArtisanPhoto} className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <input
+                type="file"
+                name="photo"
+                accept="image/*"
+                multiple
+                required
+                className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
+              />
+              <input
+                name="caption"
+                placeholder="Légende (optionnel, appliquée à toutes)"
+                className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
+              />
+              <button type="submit" className="rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-white hover:bg-forest-dark">
+                Ajouter
+              </button>
+            </form>
+            <p className="mt-2 text-xs text-gray-500">
+              Choisis une ou plusieurs photos depuis ton téléphone ou ton ordinateur (maintiens Ctrl/Cmd pour en sélectionner plusieurs) — {5 - (photos?.length || 0)} emplacement(s) restant(s).
+            </p>
+          </>
+        )}
       </section>
     </div>
   );

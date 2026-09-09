@@ -98,6 +98,9 @@ export async function uploadAvatar(formData) {
 
 // Photo de réalisation : upload direct depuis l'appareil, stockée dans le
 // bucket "artisan-photos". Chaque photo est indépendante (pas de remplacement).
+// Limite : 5 photos maximum par artisan, imposée ici côté serveur.
+const MAX_REALISATION_PHOTOS = 5;
+
 export async function addArtisanPhoto(formData) {
   const supabase = createClient();
 
@@ -113,7 +116,25 @@ export async function addArtisanPhoto(formData) {
     redirect("/dashboard/profile?error=Aucune+photo+sélectionnée");
   }
 
-  for (const file of files) {
+  const { count: existingCount } = await supabase
+    .from("artisan_photos")
+    .select("id", { count: "exact", head: true })
+    .eq("artisan_id", user.id);
+
+  const remainingSlots = MAX_REALISATION_PHOTOS - (existingCount || 0);
+
+  if (remainingSlots <= 0) {
+    redirect(
+      `/dashboard/profile?error=${encodeURIComponent(
+        `Tu as déjà ${MAX_REALISATION_PHOTOS} photos (le maximum). Supprime-en une pour en ajouter une nouvelle.`
+      )}`
+    );
+  }
+
+  const filesToUpload = files.slice(0, remainingSlots);
+  const skipped = files.length - filesToUpload.length;
+
+  for (const file of filesToUpload) {
     const ext = file.name.split(".").pop() || "jpg";
     // Un identifiant unique par fichier pour éviter que plusieurs photos
     // envoyées à la même seconde ne s'écrasent entre elles.
@@ -135,6 +156,14 @@ export async function addArtisanPhoto(formData) {
       photo_url: publicUrlData.publicUrl,
       caption: caption?.trim() || null,
     });
+  }
+
+  if (skipped > 0) {
+    redirect(
+      `/dashboard/profile?error=${encodeURIComponent(
+        `${skipped} photo(s) non ajoutée(s) : maximum ${MAX_REALISATION_PHOTOS} atteint.`
+      )}`
+    );
   }
 
   redirect("/dashboard/profile?success=1");
