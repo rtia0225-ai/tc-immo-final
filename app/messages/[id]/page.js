@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { sendMessage } from "../actions";
 import { redirect } from "next/navigation";
 
-export default async function ConversationPage({ params }) {
+export default async function ConversationPage({ params, searchParams }) {
   const supabase = createClient();
   const { id } = params;
 
@@ -21,6 +21,12 @@ export default async function ConversationPage({ params }) {
   return (
     <div className="flex h-[70vh] flex-col">
       <h1 className="mb-4 text-xl font-bold text-brand-dark">Conversation</h1>
+
+      {searchParams?.error && (
+        <p className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+          {searchParams.error}
+        </p>
+      )}
 
       <div className="flex-1 overflow-y-auto rounded-lg border border-gray-200 bg-white p-4">
         {!messages || messages.length === 0 ? (

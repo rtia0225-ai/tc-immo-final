@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { notifyNewMessage } from "@/lib/notifications";
+import { containsPhoneNumber } from "@/lib/phoneFilter";
 
 export async function startConversation(formData) {
   const supabase = createClient();
@@ -50,6 +51,17 @@ export async function sendMessage(formData) {
   } = await supabase.auth.getUser();
 
   if (!user || !content?.trim()) return;
+
+  // Interdiction d'échanger des numéros de téléphone dans les messages :
+  // les échanges doivent rester sur la plateforme (rendez-vous, paiement
+  // séquestré). Le message n'est pas envoyé, la personne doit le reformuler.
+  if (containsPhoneNumber(content)) {
+    redirect(
+      `/messages/${conversationId}?error=${encodeURIComponent(
+        "Ton message contient un numéro de téléphone. Les échanges de coordonnées ne sont pas autorisés ici — utilise la messagerie ou les rendez-vous de la plateforme."
+      )}`
+    );
+  }
 
   await supabase.from("messages").insert({
     conversation_id: conversationId,
