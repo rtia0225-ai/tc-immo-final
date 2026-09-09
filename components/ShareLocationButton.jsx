@@ -41,6 +41,10 @@ export default function ShareLocationButton({ capturedAt, latitude, longitude })
 
   return (
     <div>
+      <p className="mb-3 text-sm text-ink">
+        Attends d'être chez toi, à la maison, avant d'appuyer sur ce bouton. C'est ça qui deviendra ton adresse.
+      </p>
+
       {latitude && longitude && (
         <p className="mb-2 text-sm text-ink">
           Position enregistrée
@@ -79,8 +83,8 @@ export default function ShareLocationButton({ capturedAt, latitude, longitude })
       {status === "error" && (
         <p className="mt-2 text-sm text-brand">{errorMsg}</p>
       )}
-      <p className="mt-2 text-xs text-gray-500">
-        Fais ça depuis chez toi : ta position ne sera plus suivie ensuite, elle sert juste une fois comme adresse fixe. Jamais visible par les clients.
+      <p className="mt-3 text-xs text-gray-500">
+        Les clients ne verront jamais cette adresse.
       </p>
     </div>
   );
