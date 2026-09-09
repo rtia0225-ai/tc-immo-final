@@ -176,15 +176,7 @@ export default async function DashboardPage({ searchParams }) {
             <p className="mb-2 text-sm font-semibold text-gray-700">Projets en cours</p>
             {activeProject ? (
               <div className="rounded-lg border border-gray-200 bg-white p-5">
-                <div className="flex items-center justify-between">
-                  <p className="font-heading font-bold">{activeProject.title}</p>
-                  <Link
-                    href={`/live/${activeProject.id}`}
-                    className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark"
-                  >
-                    Ouvrir la caméra
-                  </Link>
-                </div>
+                <p className="font-heading font-bold">{activeProject.title}</p>
 
                 <div className="mt-4 flex items-center justify-between">
                   {milestones.map((m, i) => (

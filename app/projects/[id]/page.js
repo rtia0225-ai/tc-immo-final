@@ -119,15 +119,17 @@ export default async function ProjectPage({ params }) {
           </p>
         </div>
 
-        <Link
-          href={`/live/${project.id}`}
-          className="rounded-lg border border-brand-light bg-white p-4 hover:shadow-sm"
-        >
-          <p className="font-medium">Ouvrir la caméra</p>
-          <p className="text-sm text-gray-500">
-            Voir le flux caméra du chantier
-          </p>
-        </Link>
+        {!isArtisan && (
+          <Link
+            href={`/live/${project.id}`}
+            className="rounded-lg border border-brand-light bg-white p-4 hover:shadow-sm"
+          >
+            <p className="font-medium">Ouvrir la caméra</p>
+            <p className="text-sm text-gray-500">
+              Voir le flux caméra du chantier
+            </p>
+          </Link>
+        )}
       </div>
     </div>
   );
