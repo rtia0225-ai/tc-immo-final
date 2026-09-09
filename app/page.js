@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import TrustBanner from "@/components/TrustBanner";
-import { CI_CITIES, CONSTRUCTION_SERVICES } from "@/lib/constants";
+import { CI_CITIES, CONSTRUCTION_SERVICES, HOUSE_TYPES, RECOMMENDATION_OPTIONS } from "@/lib/constants";
 
 const STEPS = [
   {
@@ -71,11 +71,12 @@ export default async function HomePage() {
             </div>
             <div>
               <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Type de maison</label>
-              <input
-                name="house_type"
-                placeholder="Ex : Villa, duplex..."
-                className="mt-1 w-full rounded-lg border border-gray-200 p-2 text-sm text-gray-800"
-              />
+              <select name="house_type" defaultValue="" className="mt-1 w-full rounded-lg border border-gray-200 p-2 text-sm text-gray-800">
+                <option value="">Tous types</option>
+                {HOUSE_TYPES.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Ville</label>
@@ -88,11 +89,12 @@ export default async function HomePage() {
             </div>
             <div>
               <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Recommandation</label>
-              <input
-                name="recommendation"
-                placeholder="Ex : 3 recommandations..."
-                className="mt-1 w-full rounded-lg border border-gray-200 p-2 text-sm text-gray-800"
-              />
+              <select name="recommendation" defaultValue="" className="mt-1 w-full rounded-lg border border-gray-200 p-2 text-sm text-gray-800">
+                <option value="">Choisir</option>
+                {RECOMMENDATION_OPTIONS.map((r) => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </select>
             </div>
           </div>
           <button

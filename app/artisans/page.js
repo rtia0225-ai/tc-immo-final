@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { CI_CITIES, CONSTRUCTION_SERVICES } from "@/lib/constants";
+import { CI_CITIES, CONSTRUCTION_SERVICES, RECOMMENDATION_OPTIONS } from "@/lib/constants";
 
 export default async function ArtisansPage({ searchParams }) {
   const supabase = createClient();
-  const { trade, city } = searchParams || {};
-  // Note : "type de maison" et "recommandation" du formulaire d'accueil sont
-  // capturés mais pas encore reliés à une colonne dédiée — à affiner une fois
-  // qu'on décide comment les modéliser (ex: tags projet, seuil d'avis).
+  const { trade, city, recommendation } = searchParams || {};
+  // Note : "type de maison" est capturé mais pas encore relié à un critère
+  // de filtrage (aucun champ artisan n'y correspond pour l'instant).
 
   const { data: allArtisans } = await supabase
     .from("artisan_profiles")
@@ -18,7 +17,7 @@ export default async function ArtisansPage({ searchParams }) {
     )
     .order("is_verified", { ascending: false });
 
-  const artisans = (allArtisans || []).filter((a) => {
+  let artisans = (allArtisans || []).filter((a) => {
     // Métier : correspond au métier principal OU à l'un des services proposés
     const matchesTrade =
       !trade || a.trade === trade || (a.services || []).includes(trade);
@@ -33,6 +32,14 @@ export default async function ArtisansPage({ searchParams }) {
 
     return matchesTrade && matchesCity;
   });
+
+  // "3 recommandations" : les 3 meilleurs profils (vérifiés en priorité,
+  // puis les plus expérimentés). "Toute la liste" : aucune limite.
+  if (recommendation === "top3") {
+    artisans = [...artisans]
+      .sort((a, b) => (b.years_experience || 0) - (a.years_experience || 0))
+      .slice(0, 3);
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -52,10 +59,20 @@ export default async function ArtisansPage({ searchParams }) {
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
+        <select name="recommendation" defaultValue={recommendation || ""} className="flex-1 rounded-lg border border-gray-300 p-2 text-sm">
+          <option value="">Toute la liste</option>
+          {RECOMMENDATION_OPTIONS.map((r) => (
+            <option key={r.value} value={r.value}>{r.label}</option>
+          ))}
+        </select>
         <button type="submit" className="rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
           Filtrer
         </button>
       </form>
+
+      {recommendation === "top3" && (
+        <p className="mt-3 text-sm text-gray-500">Nos 3 recommandations les plus expérimentées.</p>
+      )}
 
       {artisans.length === 0 ? (
         <p className="mt-8 text-gray-500">Aucun artisan ne correspond à ta recherche.</p>
