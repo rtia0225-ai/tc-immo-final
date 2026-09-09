@@ -42,7 +42,7 @@ export default function ShareLocationButton({ capturedAt, latitude, longitude })
   return (
     <div>
       <p className="mb-3 text-sm text-ink">
-        Attends d'être chez toi, à la maison, avant d'appuyer sur ce bouton. C'est ça qui deviendra ton adresse.
+        Attends d'être chez toi à la maison avant d'appuyer sur ce bouton.
       </p>
 
       {latitude && longitude && (
@@ -83,9 +83,6 @@ export default function ShareLocationButton({ capturedAt, latitude, longitude })
       {status === "error" && (
         <p className="mt-2 text-sm text-brand">{errorMsg}</p>
       )}
-      <p className="mt-3 text-xs text-gray-500">
-        Les clients ne verront jamais cette adresse.
-      </p>
     </div>
   );
 }
