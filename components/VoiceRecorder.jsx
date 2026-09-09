@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { sendVoiceMessage } from "./actions";
+import { sendVoiceMessage } from "@/app/messages/actions";
 
 export default function VoiceRecorder({ conversationId }) {
   const [status, setStatus] = useState("idle"); // idle | recording | sending | error
