@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { sendMessage } from "../actions";
 import { redirect } from "next/navigation";
+import VoiceRecorder from "@/components/VoiceRecorder";
 
 export default async function ConversationPage({ params, searchParams }) {
   const supabase = createClient();
@@ -14,7 +15,7 @@ export default async function ConversationPage({ params, searchParams }) {
 
   const { data: messages } = await supabase
     .from("messages")
-    .select("id, content, sender_id, created_at")
+    .select("id, content, audio_url, sender_id, created_at")
     .eq("conversation_id", id)
     .order("created_at", { ascending: true });
 
@@ -44,28 +45,35 @@ export default async function ConversationPage({ params, searchParams }) {
                     : "bg-gray-100"
                 }`}
               >
-                {m.content}
+                {m.audio_url ? (
+                  <audio controls src={m.audio_url} className="h-10 w-56" />
+                ) : (
+                  m.content
+                )}
               </div>
             ))}
           </div>
         )}
       </div>
 
-      <form action={sendMessage} className="mt-4 flex gap-2">
-        <input type="hidden" name="conversationId" value={id} />
-        <input
-          name="content"
-          required
-          placeholder="Écris ton message..."
-          className="flex-1 rounded-lg border border-gray-300 p-2"
-        />
-        <button
-          type="submit"
-          className="rounded-lg bg-brand px-4 py-2 text-white hover:bg-brand-dark"
-        >
-          Envoyer
-        </button>
-      </form>
+      <div className="mt-4 flex items-center gap-2">
+        <VoiceRecorder conversationId={id} />
+        <form action={sendMessage} className="flex flex-1 gap-2">
+          <input type="hidden" name="conversationId" value={id} />
+          <input
+            name="content"
+            required
+            placeholder="Écris ton message..."
+            className="flex-1 rounded-lg border border-gray-300 p-2"
+          />
+          <button
+            type="submit"
+            className="rounded-lg bg-brand px-4 py-2 text-white hover:bg-brand-dark"
+          >
+            Envoyer
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

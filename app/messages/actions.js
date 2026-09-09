@@ -86,3 +86,58 @@ export async function sendMessage(formData) {
 
   redirect(`/messages/${conversationId}`);
 }
+
+// Envoi d'une note vocale : reçoit l'audio enregistré depuis le micro du
+// téléphone (voir components/VoiceRecorder.jsx), le stocke dans le bucket
+// "voice-notes", puis crée le message correspondant.
+// NOTE IMPORTANTE : le filtre anti-numéro de téléphone ne s'applique
+// qu'aux messages texte — il ne peut pas "écouter" l'audio pour vérifier
+// si un numéro y est dit à l'oral.
+export async function sendVoiceMessage(formData) {
+  const supabase = createClient();
+  const conversationId = formData.get("conversationId");
+  const file = formData.get("audio");
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user || !file || typeof file === "string" || file.size === 0) {
+    return { error: "Échec de l'enregistrement." };
+  }
+
+  const path = `${user.id}/${Date.now()}.webm`;
+  const arrayBuffer = await file.arrayBuffer();
+
+  const { error: uploadError } = await supabase.storage
+    .from("voice-notes")
+    .upload(path, arrayBuffer, { contentType: file.type || "audio/webm" });
+
+  if (uploadError) {
+    return { error: uploadError.message };
+  }
+
+  const { data: publicUrlData } = supabase.storage.from("voice-notes").getPublicUrl(path);
+
+  await supabase.from("messages").insert({
+    conversation_id: conversationId,
+    sender_id: user.id,
+    audio_url: publicUrlData.publicUrl,
+  });
+
+  const { data: conversation } = await supabase
+    .from("conversations")
+    .select("client_id, artisan_id")
+    .eq("id", conversationId)
+    .single();
+
+  if (conversation) {
+    const recipientId =
+      conversation.client_id === user.id
+        ? conversation.artisan_id
+        : conversation.client_id;
+    await notifyNewMessage(recipientId);
+  }
+
+  return { success: true };
+}

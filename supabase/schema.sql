@@ -474,3 +474,21 @@ create policy "supprimer ses propres photos" on storage.objects
 alter table profiles add column if not exists home_latitude double precision;
 alter table profiles add column if not exists home_longitude double precision;
 alter table profiles add column if not exists home_location_captured_at timestamptz;
+
+-- ---------------------------------------------------------
+-- 15. NOTES VOCALES DANS LA MESSAGERIE
+-- ---------------------------------------------------------
+alter table messages alter column content drop not null;
+alter table messages add column if not exists audio_url text;
+
+insert into storage.buckets (id, name, public)
+values ('voice-notes', 'voice-notes', true)
+on conflict (id) do nothing;
+
+create policy "notes vocales lecture publique" on storage.objects
+  for select using (bucket_id = 'voice-notes');
+
+create policy "envoyer sa propre note vocale" on storage.objects
+  for insert with check (
+    bucket_id = 'voice-notes' and (storage.foldername(name))[1] = auth.uid()::text
+  );
