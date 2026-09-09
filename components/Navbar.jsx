@@ -76,6 +76,19 @@ export default function Navbar({ user }) {
                 Créer un compte
               </Link>
             )}
+            <div className="my-1 border-t border-gray-100" />
+            <Link href="/a-propos" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
+              À propos
+            </Link>
+            <Link href="/comment-ca-marche" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
+              Comment ça marche
+            </Link>
+            <Link href="/ressources" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
+              Ressources
+            </Link>
+            <Link href="/faq" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
+              FAQ
+            </Link>
           </div>
         </div>
       )}

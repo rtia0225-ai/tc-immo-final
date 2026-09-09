@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { logout } from "../auth/actions";
 
-const TABS = [
+const CLIENT_TABS = [
   { key: "projets", label: "Mes projets" },
   { key: "paiements", label: "Paiements" },
   { key: "messagerie", label: "Messagerie" },
@@ -32,7 +32,6 @@ export default async function DashboardPage({ searchParams }) {
     .or(`client_id.eq.${user.id},artisan_id.eq.${user.id}`)
     .order("created_at", { ascending: false });
 
-  // Le "chantier" mis en avant : le projet actif le plus récent
   const activeProject = (projects || []).find(
     (p) => p.status !== "released" && p.status !== "cancelled"
   );
@@ -54,9 +53,9 @@ export default async function DashboardPage({ searchParams }) {
   const totalEtapes = milestones.length;
   const avancement = totalEtapes > 0 ? Math.round((etapesValidees / totalEtapes) * 100) : 0;
 
-  // Données pour l'onglet Messagerie
+  // Onglet Messagerie (client uniquement)
   let conversations = [];
-  if (activeTab === "messagerie") {
+  if (!isArtisan && activeTab === "messagerie") {
     const { data } = await supabase
       .from("conversations")
       .select(
@@ -69,9 +68,38 @@ export default async function DashboardPage({ searchParams }) {
     conversations = data || [];
   }
 
+  // Raccourcis artisan : nouveaux messages / nouveaux rendez-vous
+  let unreadCount = 0;
+  let upcomingCount = 0;
+  if (isArtisan) {
+    const { data: myConversations } = await supabase
+      .from("conversations")
+      .select("id")
+      .or(`client_id.eq.${user.id},artisan_id.eq.${user.id}`);
+    const conversationIds = (myConversations || []).map((c) => c.id);
+
+    if (conversationIds.length > 0) {
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .in("conversation_id", conversationIds)
+        .neq("sender_id", user.id)
+        .is("read_at", null);
+      unreadCount = count || 0;
+    }
+
+    const { data: appts } = await supabase
+      .from("appointments")
+      .select("id")
+      .or(`client_id.eq.${user.id},artisan_id.eq.${user.id}`)
+      .in("status", ["proposed", "confirmed"])
+      .gte("scheduled_at", new Date().toISOString());
+    upcomingCount = appts?.length || 0;
+  }
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      {/* Bandeau d'accueil avec indicateurs */}
+      {/* Bandeau d'accueil */}
       <div className="rounded-lg bg-forest p-6 text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -86,7 +114,7 @@ export default async function DashboardPage({ searchParams }) {
           <div className="flex items-center gap-3">
             {isArtisan && (
               <Link href="/dashboard/profile" className="text-xs text-white/80 underline hover:text-white">
-                Modifier mon profil
+                Mes infos
               </Link>
             )}
             <form action={logout}>
@@ -111,24 +139,41 @@ export default async function DashboardPage({ searchParams }) {
         </div>
       </div>
 
-      {/* Onglets */}
-      <div className="mt-6 flex gap-6 border-b border-gray-200 text-sm font-medium">
-        {TABS.map((tab) => (
-          <Link
-            key={tab.key}
-            href={`/dashboard?tab=${tab.key}`}
-            className={`-mb-px border-b-2 pb-2 ${
-              activeTab === tab.key ? "border-brand text-brand" : "border-transparent text-gray-500"
-            }`}
-          >
-            {tab.label}
-          </Link>
-        ))}
-      </div>
+      {isArtisan ? (
+        <>
+          {/* Raccourcis artisan */}
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <Link
+              href="/messages"
+              className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 hover:shadow-sm"
+            >
+              <span className="text-sm font-semibold text-ink">Nouveaux messages</span>
+              {unreadCount > 0 && (
+                <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-white">{unreadCount}</span>
+              )}
+            </Link>
+            <Link
+              href="/appointments"
+              className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 hover:shadow-sm"
+            >
+              <span className="text-sm font-semibold text-ink">Nouveaux rendez-vous</span>
+              {upcomingCount > 0 && (
+                <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-white">{upcomingCount}</span>
+              )}
+            </Link>
+          </div>
 
-      <div className="py-6">
-        {activeTab === "projets" && (
-          <>
+          <Link
+            href="/dashboard/revenus"
+            className="mt-3 block rounded-lg border border-gray-200 bg-white p-4 hover:shadow-sm"
+          >
+            <span className="text-sm font-semibold text-ink">Mes revenus</span>
+            <p className="mt-0.5 text-xs text-gray-500">Paiements perçus et en attente</p>
+          </Link>
+
+          {/* Projets en cours */}
+          <div className="mt-6">
+            <p className="mb-2 text-sm font-semibold text-gray-700">Projets en cours</p>
             {activeProject ? (
               <div className="rounded-lg border border-gray-200 bg-white p-5">
                 <div className="flex items-center justify-between">
@@ -141,7 +186,6 @@ export default async function DashboardPage({ searchParams }) {
                   </Link>
                 </div>
 
-                {/* Chronogramme */}
                 <div className="mt-4 flex items-center justify-between">
                   {milestones.map((m, i) => (
                     <div key={m.id} className="flex flex-1 flex-col items-center text-center">
@@ -157,73 +201,145 @@ export default async function DashboardPage({ searchParams }) {
                   ))}
                 </div>
 
-                <div className="mt-5 grid grid-cols-3 gap-2">
-                  <Link href={`/projects/${activeProject.id}`} className="rounded-lg border border-gray-200 py-2 text-center text-xs font-medium hover:bg-gray-50">
-                    Documents
-                  </Link>
-                  <Link href={`/projects/${activeProject.id}`} className="rounded-lg bg-forest py-2 text-center text-xs font-medium text-white hover:bg-forest-dark">
-                    Messagerie
-                  </Link>
-                  <Link href={`/projects/${activeProject.id}`} className="rounded-lg bg-brand py-2 text-center text-xs font-medium text-white hover:bg-brand-dark">
-                    Paiements
-                  </Link>
-                </div>
+                <Link
+                  href={`/projects/${activeProject.id}`}
+                  className="mt-5 block rounded-lg bg-forest py-2 text-center text-xs font-semibold text-white hover:bg-forest-dark"
+                >
+                  Ouvrir le projet (cocher les étapes, documents, messagerie, paiements)
+                </Link>
               </div>
             ) : (
               <p className="text-gray-500">Aucun projet en cours pour le moment.</p>
             )}
 
             {projects && projects.length > 0 && (
-              <div className="mt-6">
-                <p className="mb-2 text-sm font-semibold text-gray-700">Historique</p>
-                <div className="flex flex-col gap-2">
-                  {projects.map((p) => (
-                    <Link key={p.id} href={`/projects/${p.id}`} className="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-3 text-sm hover:shadow-sm">
-                      <span>{p.title}</span>
-                      <span className="text-gray-500">{p.status}</span>
-                    </Link>
-                  ))}
-                </div>
+              <div className="mt-4 flex flex-col gap-2">
+                {projects.map((p) => (
+                  <Link key={p.id} href={`/projects/${p.id}`} className="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-3 text-sm hover:shadow-sm">
+                    <span>{p.title}</span>
+                    <span className="text-gray-500">{p.status}</span>
+                  </Link>
+                ))}
               </div>
             )}
-          </>
-        )}
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Onglets client */}
+          <div className="mt-6 flex gap-6 border-b border-gray-200 text-sm font-medium">
+            {CLIENT_TABS.map((tab) => (
+              <Link
+                key={tab.key}
+                href={`/dashboard?tab=${tab.key}`}
+                className={`-mb-px border-b-2 pb-2 ${
+                  activeTab === tab.key ? "border-brand text-brand" : "border-transparent text-gray-500"
+                }`}
+              >
+                {tab.label}
+              </Link>
+            ))}
+          </div>
 
-        {activeTab === "paiements" && (
-          <div className="flex flex-col gap-2">
-            {!projects || projects.length === 0 ? (
-              <p className="text-gray-500">Aucun paiement pour le moment.</p>
-            ) : (
-              projects.map((p) => (
-                <div key={p.id} className="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-3 text-sm">
-                  <span>{p.title}</span>
-                  <span className="font-medium">{p.amount} {p.currency} — {p.status}</span>
-                </div>
-              ))
+          <div className="py-6">
+            {activeTab === "projets" && (
+              <>
+                {activeProject ? (
+                  <div className="rounded-lg border border-gray-200 bg-white p-5">
+                    <div className="flex items-center justify-between">
+                      <p className="font-heading font-bold">{activeProject.title}</p>
+                      <Link
+                        href={`/live/${activeProject.id}`}
+                        className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark"
+                      >
+                        Ouvrir la caméra
+                      </Link>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between">
+                      {milestones.map((m, i) => (
+                        <div key={m.id} className="flex flex-1 flex-col items-center text-center">
+                          <div
+                            className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
+                              m.is_completed ? "bg-forest text-white" : "bg-gray-200 text-gray-500"
+                            }`}
+                          >
+                            {m.is_completed ? "✓" : i + 1}
+                          </div>
+                          <p className="mt-1 text-[10px] text-gray-500">{m.title}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-5 grid grid-cols-3 gap-2">
+                      <Link href={`/projects/${activeProject.id}`} className="rounded-lg border border-gray-200 py-2 text-center text-xs font-medium hover:bg-gray-50">
+                        Documents
+                      </Link>
+                      <Link href={`/projects/${activeProject.id}`} className="rounded-lg bg-forest py-2 text-center text-xs font-medium text-white hover:bg-forest-dark">
+                        Messagerie
+                      </Link>
+                      <Link href={`/projects/${activeProject.id}`} className="rounded-lg bg-brand py-2 text-center text-xs font-medium text-white hover:bg-brand-dark">
+                        Paiements
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-500">Aucun projet en cours pour le moment.</p>
+                )}
+
+                {projects && projects.length > 0 && (
+                  <div className="mt-6">
+                    <p className="mb-2 text-sm font-semibold text-gray-700">Historique</p>
+                    <div className="flex flex-col gap-2">
+                      {projects.map((p) => (
+                        <Link key={p.id} href={`/projects/${p.id}`} className="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-3 text-sm hover:shadow-sm">
+                          <span>{p.title}</span>
+                          <span className="text-gray-500">{p.status}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {activeTab === "paiements" && (
+              <div className="flex flex-col gap-2">
+                {!projects || projects.length === 0 ? (
+                  <p className="text-gray-500">Aucun paiement pour le moment.</p>
+                ) : (
+                  projects.map((p) => (
+                    <div key={p.id} className="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-3 text-sm">
+                      <span>{p.title}</span>
+                      <span className="font-medium">{p.amount} {p.currency} — {p.status}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {activeTab === "messagerie" && (
+              <div className="flex flex-col gap-2">
+                {conversations.length === 0 ? (
+                  <p className="text-gray-500">Aucune conversation pour le moment.</p>
+                ) : (
+                  conversations.map((c) => (
+                    <Link key={c.id} href={`/messages/${c.id}`} className="rounded-lg border border-gray-100 bg-white p-3 text-sm hover:shadow-sm">
+                      Conversation avec {c.artisan?.profiles?.full_name || c.client?.full_name}
+                    </Link>
+                  ))
+                )}
+              </div>
+            )}
+
+            {activeTab === "documents" && (
+              <p className="text-gray-500">
+                Bientôt : dépôt et partage de documents liés à tes projets.
+              </p>
             )}
           </div>
-        )}
-
-        {activeTab === "messagerie" && (
-          <div className="flex flex-col gap-2">
-            {conversations.length === 0 ? (
-              <p className="text-gray-500">Aucune conversation pour le moment.</p>
-            ) : (
-              conversations.map((c) => (
-                <Link key={c.id} href={`/messages/${c.id}`} className="rounded-lg border border-gray-100 bg-white p-3 text-sm hover:shadow-sm">
-                  Conversation avec {c.artisan?.profiles?.full_name || c.client?.full_name}
-                </Link>
-              ))
-            )}
-          </div>
-        )}
-
-        {activeTab === "documents" && (
-          <p className="text-gray-500">
-            Bientôt : dépôt et partage de documents liés à tes projets.
-          </p>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }
