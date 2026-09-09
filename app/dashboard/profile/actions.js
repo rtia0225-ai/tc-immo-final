@@ -2,6 +2,34 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+
+// Enregistre la position GPS capturée une seule fois (comme un partage de
+// position WhatsApp) — devient l'adresse fixe de l'artisan. Appelée
+// directement depuis le bouton "Partager ma position", pas via un
+// formulaire classique.
+export async function saveHomeLocation(latitude, longitude) {
+  const supabase = createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non connecté" };
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      home_latitude: latitude,
+      home_longitude: longitude,
+      home_location_captured_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/profile");
+  return { success: true };
+}
 
 // Met à jour à la fois les infos personnelles (privées) et le profil
 // professionnel public de l'artisan, en une seule soumission.

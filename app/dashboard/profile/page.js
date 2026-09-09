@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { updateArtisanProfile, addArtisanPhoto, deleteArtisanPhoto, uploadAvatar } from "./actions";
 import { CI_CITIES, CONSTRUCTION_SERVICES, DAYS_OF_WEEK } from "@/lib/constants";
+import ShareLocationButton from "@/components/ShareLocationButton";
 
 export default async function ArtisanProfileEditPage({ searchParams }) {
   const supabase = createClient();
@@ -151,6 +152,15 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="border-t border-gray-100 pt-4">
+              <label className="mb-2 block text-sm font-medium">Adresse exacte (position GPS, privée)</label>
+              <ShareLocationButton
+                latitude={profile?.home_latitude}
+                longitude={profile?.home_longitude}
+                capturedAt={profile?.home_location_captured_at}
+              />
             </div>
           </div>
         </section>

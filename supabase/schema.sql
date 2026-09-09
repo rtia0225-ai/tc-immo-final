@@ -465,3 +465,12 @@ create policy "supprimer ses propres photos" on storage.objects
   for delete using (
     bucket_id = 'artisan-photos' and (storage.foldername(name))[1] = auth.uid()::text
   );
+
+-- ---------------------------------------------------------
+-- 14. LOCALISATION FIXE (capturée une seule fois, façon partage de
+-- position WhatsApp). Information privée, utilisée pour la vérification
+-- du domicile — jamais affichée sur le profil public.
+-- ---------------------------------------------------------
+alter table profiles add column if not exists home_latitude double precision;
+alter table profiles add column if not exists home_longitude double precision;
+alter table profiles add column if not exists home_location_captured_at timestamptz;
