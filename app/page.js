@@ -32,7 +32,7 @@ export default async function HomePage() {
   const { data: artisans } = await supabase
     .from("artisan_profiles")
     .select(
-      `id, trade, is_verified, profiles ( full_name, city )`
+      `id, trade, is_verified, profiles ( full_name, city, avatar_url )`
     )
     .order("is_verified", { ascending: false })
     .limit(8);
@@ -125,9 +125,18 @@ export default async function HomePage() {
                 href={`/artisans/${a.id}`}
                 className="w-64 shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md"
               >
-                <div className="flex h-36 items-center justify-center bg-gradient-to-br from-forest-light to-brand-light text-4xl">
-                  🛠️
-                </div>
+                {a.profiles?.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={a.profiles.avatar_url}
+                    alt={a.profiles?.full_name}
+                    className="h-36 w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-36 items-center justify-center bg-gradient-to-br from-forest-light to-brand-light text-4xl">
+                    🛠️
+                  </div>
+                )}
                 <div className="p-4">
                   {a.is_verified && (
                     <span className="mb-2 inline-block rounded-full bg-brand-light px-2 py-0.5 text-[10px] font-bold uppercase text-brand">

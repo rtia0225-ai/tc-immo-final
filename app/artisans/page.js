@@ -100,7 +100,19 @@ export default async function ArtisansPage({ searchParams }) {
               href={`/artisans/${a.id}`}
               className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm hover:shadow-md"
             >
-              <div className="flex items-start justify-between">
+              <div className="flex items-start gap-3">
+                {a.profiles?.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={a.profiles.avatar_url}
+                    alt={a.profiles?.full_name}
+                    className="h-12 w-12 shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gray-100 font-heading text-sm font-bold text-gray-400">
+                    {a.profiles?.full_name?.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
                 <div>
                   {a.is_verified && (
                     <span className="mb-1 inline-block rounded-full bg-brand-light px-2 py-0.5 text-[10px] font-bold uppercase text-brand">

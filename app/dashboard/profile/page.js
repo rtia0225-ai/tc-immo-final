@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { updateArtisanProfile, addArtisanPhoto, deleteArtisanPhoto } from "./actions";
+import { updateArtisanProfile, addArtisanPhoto, deleteArtisanPhoto, uploadAvatar } from "./actions";
 import { CI_CITIES, CONSTRUCTION_SERVICES, DAYS_OF_WEEK } from "@/lib/constants";
 
 export default async function ArtisanProfileEditPage({ searchParams }) {
@@ -45,8 +45,50 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
           Profil mis à jour avec succès.
         </p>
       )}
+      {searchParams?.error && (
+        <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+          {searchParams.error}
+        </p>
+      )}
 
-      <form action={updateArtisanProfile} className="mt-6 flex flex-col gap-8">
+      {/* Photo de profil */}
+      <section className="mt-6">
+        <h2 className="font-heading text-lg font-bold text-brand">Photo de profil</h2>
+        <div className="mt-3 flex items-center gap-4">
+          {profile?.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={profile.avatar_url}
+              alt="Photo de profil"
+              className="h-20 w-20 rounded-full object-cover"
+            />
+          ) : (
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 font-heading text-xl font-bold text-gray-400">
+              {profile?.full_name?.slice(0, 2).toUpperCase()}
+            </div>
+          )}
+          <form action={uploadAvatar} className="flex items-center gap-2">
+            <input
+              type="file"
+              name="avatar"
+              accept="image/*"
+              required
+              className="text-sm"
+            />
+            <button
+              type="submit"
+              className="rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white hover:bg-forest-dark"
+            >
+              Envoyer
+            </button>
+          </form>
+        </div>
+        <p className="mt-2 text-xs text-gray-500">
+          Choisis une photo depuis ton téléphone ou ton ordinateur — elle sera visible par les clients.
+        </p>
+      </section>
+
+      <form action={updateArtisanProfile} className="mt-8 flex flex-col gap-8">
         {/* ------------------------------------------------------ */}
         <section>
           <h2 className="font-heading text-lg font-bold text-brand">Informations personnelles</h2>
@@ -268,8 +310,9 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
 
         <form action={addArtisanPhoto} className="mt-4 flex flex-col gap-2 sm:flex-row">
           <input
-            name="photoUrl"
-            placeholder="URL de la photo"
+            type="file"
+            name="photo"
+            accept="image/*"
             required
             className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
           />
@@ -283,7 +326,7 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
           </button>
         </form>
         <p className="mt-2 text-xs text-gray-500">
-          Pour l'instant, ajoute une photo via son lien (URL). L'upload direct depuis ton téléphone sera ajouté ensuite (nécessite de connecter le stockage de fichiers).
+          Choisis une photo directement depuis ton téléphone ou ton ordinateur.
         </p>
       </section>
     </div>

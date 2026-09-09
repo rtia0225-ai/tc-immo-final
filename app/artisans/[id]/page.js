@@ -55,12 +55,29 @@ export default async function ArtisanProfilePage({ params }) {
       )}
 
       {/* Identité et infos clés */}
-      <div className="mt-6">
-        <h1 className="font-heading text-2xl font-bold">{artisan.profiles?.full_name}</h1>
-        <p className="text-sm text-brand">{artisan.trade}</p>
-        <p className="mt-1 flex items-center gap-1 text-sm text-gray-500">
-          📍 {artisan.profiles?.city || "Côte d'Ivoire"}
-        </p>
+      <div className="mt-6 flex items-start gap-4">
+        {artisan.profiles?.avatar_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={artisan.profiles.avatar_url}
+            alt={artisan.profiles?.full_name}
+            className="h-16 w-16 shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gray-100 font-heading text-lg font-bold text-gray-400">
+            {artisan.profiles?.full_name?.slice(0, 2).toUpperCase()}
+          </div>
+        )}
+        <div>
+          <h1 className="font-heading text-2xl font-bold">{artisan.profiles?.full_name}</h1>
+          <p className="text-sm text-brand">{artisan.trade}</p>
+          <p className="mt-1 flex items-center gap-1 text-sm text-gray-500">
+            📍 {artisan.profiles?.city || "Côte d'Ivoire"}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-2">
 
         {/* Mobilité */}
         <p className="mt-2 text-sm text-gray-600">
