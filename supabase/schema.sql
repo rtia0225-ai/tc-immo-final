@@ -540,3 +540,9 @@ create policy "creer le contrat a la creation du projet" on contracts
   for insert with check (
     exists (select 1 from projects p where p.id = contracts.project_id and p.client_id = auth.uid())
   );
+
+-- ---------------------------------------------------------
+-- 18. COMPTE MOBILE MONEY (reversements artisan — pas de compte bancaire)
+-- ---------------------------------------------------------
+alter table artisan_profiles add column if not exists mobile_money_operator text;
+alter table artisan_profiles add column if not exists mobile_money_number text;

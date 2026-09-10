@@ -22,10 +22,9 @@ export default function Navbar({ user }) {
               <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
-          <Link href="/" className="font-heading text-xl font-extrabold tracking-tight">
-            <span className="text-forest">TC</span>
-            <span className="text-gray-300"> - </span>
-            <span className="text-brand">Immo</span>
+          <Link href="/" className="flex items-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="TC-Immo" className="h-10 w-auto" />
           </Link>
         </div>
 

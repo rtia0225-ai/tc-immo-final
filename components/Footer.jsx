@@ -3,11 +3,10 @@ export default function Footer() {
     <footer className="bg-ink px-4 py-14 text-gray-300">
       <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2">
         <div>
-          <p className="font-heading text-lg font-extrabold">
-            <span className="text-brand">TC</span>
-            <span className="text-gray-500">-</span>
-            <span className="text-forest-light">Immo</span>
-          </p>
+          <div className="inline-block rounded-lg bg-white p-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="TC-Immo" className="h-10 w-auto" />
+          </div>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-gray-400">
             La marketplace de confiance pour construire en Côte d'Ivoire depuis l'étranger.
           </p>
