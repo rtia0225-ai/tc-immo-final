@@ -12,6 +12,7 @@ export default async function ArtisanProfilePage({ params }) {
   } = await supabase.auth.getUser();
 
   let viewerIsArtisan = false;
+  let isOwnProfile = false;
   if (user) {
     const { data: viewerProfile } = await supabase
       .from("profiles")
@@ -19,6 +20,7 @@ export default async function ArtisanProfilePage({ params }) {
       .eq("id", user.id)
       .single();
     viewerIsArtisan = viewerProfile?.role === "artisan";
+    isOwnProfile = user.id === id;
   }
 
   const { data: artisan } = await supabase
@@ -131,29 +133,39 @@ export default async function ArtisanProfilePage({ params }) {
         )}
       </div>
 
-      {/* Actions — seul un client peut démarrer un projet */}
-      <div className={`mt-4 grid gap-3 ${viewerIsArtisan ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
-        <Link
-          href={`/appointments/new?artisan=${artisan.id}`}
-          className="rounded-md bg-brand px-4 py-3 text-center text-sm font-bold text-white hover:bg-brand-dark"
-        >
-          Rendez-vous visio
-        </Link>
-        <Link
-          href={`/messages/new?artisan=${artisan.id}`}
-          className="rounded-md border border-gray-300 px-4 py-3 text-center text-sm font-bold text-ink hover:bg-gray-50"
-        >
-          Message
-        </Link>
-        {!viewerIsArtisan && (
-          <Link
-            href={`/projects/new?artisan=${artisan.id}`}
-            className="rounded-md bg-forest px-4 py-3 text-center text-sm font-bold text-white hover:bg-forest-dark"
-          >
-            Démarrer un projet
+      {/* Actions — un artisan ne peut ni se contacter ni démarrer un
+          projet avec lui-même ; seul un client peut démarrer un projet */}
+      {isOwnProfile ? (
+        <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 text-center text-sm text-gray-500">
+          Ceci est ton propre profil public.{" "}
+          <Link href="/dashboard/profile" className="font-medium text-brand hover:underline">
+            Le modifier
           </Link>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className={`mt-4 grid gap-3 ${viewerIsArtisan ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
+          <Link
+            href={`/appointments/new?artisan=${artisan.id}`}
+            className="rounded-md bg-brand px-4 py-3 text-center text-sm font-bold text-white hover:bg-brand-dark"
+          >
+            Rendez-vous visio
+          </Link>
+          <Link
+            href={`/messages/new?artisan=${artisan.id}`}
+            className="rounded-md border border-gray-300 px-4 py-3 text-center text-sm font-bold text-ink hover:bg-gray-50"
+          >
+            Message
+          </Link>
+          {!viewerIsArtisan && (
+            <Link
+              href={`/projects/new?artisan=${artisan.id}`}
+              className="rounded-md bg-forest px-4 py-3 text-center text-sm font-bold text-white hover:bg-forest-dark"
+            >
+              Démarrer un projet
+            </Link>
+          )}
+        </div>
+      )}
 
       {/* Avis */}
       <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6">

@@ -15,8 +15,14 @@ export default function LoginPage({ searchParams }) {
       <form action={login} className="mt-6 flex flex-col gap-4">
         <input type="hidden" name="redirect" value={redirectTo} />
         <div>
-          <label className="mb-1 block text-sm font-medium">Email</label>
-          <input type="email" name="email" required className="w-full rounded-lg border border-gray-300 p-2" />
+          <label className="mb-1 block text-sm font-medium">Email ou numéro de téléphone</label>
+          <input
+            type="text"
+            name="identifier"
+            required
+            placeholder="email@exemple.com ou 07 00 00 00 00"
+            className="w-full rounded-lg border border-gray-300 p-2"
+          />
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium">Mot de passe</label>

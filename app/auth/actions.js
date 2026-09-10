@@ -3,20 +3,23 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ensureProfile } from "@/lib/ensureProfile";
+import { toAuthIdentity } from "@/lib/authIdentity";
 
 export async function signup(formData) {
   const supabase = createClient();
 
-  const email = formData.get("email");
+  const identifier = formData.get("identifier"); // email OU numéro de téléphone
   const password = formData.get("password");
   const fullName = formData.get("fullName");
   const role = formData.get("role"); // 'client' ou 'artisan'
   const trade = formData.get("trade"); // uniquement si artisan
   const redirectTo = formData.get("redirect"); // page à retrouver après connexion
 
-  // On stocke nom/rôle/métier dans les métadonnées du compte : elles
-  // survivent même si la confirmation d'email retarde la création du
-  // profil en base de données.
+  const { email, phone } = toAuthIdentity(identifier);
+
+  // On stocke nom/rôle/métier/téléphone dans les métadonnées du compte :
+  // elles survivent même si la confirmation d'email retarde la création
+  // du profil en base de données.
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -25,12 +28,16 @@ export async function signup(formData) {
         full_name: fullName,
         role,
         trade,
+        phone,
       },
     },
   });
 
   if (error) {
-    return redirect(`/auth/signup?error=${encodeURIComponent(error.message)}`);
+    const url = redirectTo
+      ? `/auth/signup?redirect=${encodeURIComponent(redirectTo)}&error=${encodeURIComponent(error.message)}`
+      : `/auth/signup?error=${encodeURIComponent(error.message)}`;
+    return redirect(url);
   }
 
   const userId = data.user?.id;
@@ -42,6 +49,7 @@ export async function signup(formData) {
       id: userId,
       full_name: fullName,
       role,
+      phone,
     });
 
     if (role === "artisan") {
@@ -61,9 +69,11 @@ export async function signup(formData) {
 export async function login(formData) {
   const supabase = createClient();
 
-  const email = formData.get("email");
+  const identifier = formData.get("identifier"); // email OU numéro de téléphone
   const password = formData.get("password");
   const redirectTo = formData.get("redirect"); // page à retrouver après connexion
+
+  const { email } = toAuthIdentity(identifier);
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,

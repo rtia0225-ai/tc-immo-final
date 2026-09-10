@@ -16,6 +16,10 @@ export default async function NewConversationPage({ searchParams }) {
     redirect(`/auth/login?redirect=${encodeURIComponent(currentPath)}`);
   }
 
+  if (user.id === artisanId) {
+    redirect(`/artisans/${artisanId}`);
+  }
+
   const { data: existing } = await supabase
     .from("conversations")
     .select("id")

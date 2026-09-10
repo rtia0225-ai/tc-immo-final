@@ -15,6 +15,10 @@ export default async function NewAppointmentPage({ searchParams }) {
     redirect(`/auth/login?redirect=${encodeURIComponent(currentPath)}`);
   }
 
+  if (user.id === artisanId) {
+    redirect(`/artisans/${artisanId}`);
+  }
+
   const { data: artisan } = await supabase
     .from("artisan_profiles")
     .select("id, trade, profiles ( full_name )")

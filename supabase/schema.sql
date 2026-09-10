@@ -557,3 +557,40 @@ alter table project_milestones add column if not exists amount numeric(12,2);
 alter table project_milestones add column if not exists paid_at timestamptz;
 
 drop trigger if exists on_project_created on projects;
+
+-- ---------------------------------------------------------
+-- 19. IDENTIFIANT EMAIL OU TÉLÉPHONE
+-- Mise à jour de la création automatique de profil pour récupérer aussi
+-- le numéro de téléphone (quand l'inscription se fait par téléphone
+-- plutôt que par email — beaucoup d'artisans n'ont pas d'email).
+-- ---------------------------------------------------------
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_full_name text;
+  v_role user_role;
+  v_trade text;
+  v_phone text;
+begin
+  v_full_name := coalesce(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1));
+  v_role := coalesce((new.raw_user_meta_data->>'role')::user_role, 'client');
+  v_trade := new.raw_user_meta_data->>'trade';
+  v_phone := new.raw_user_meta_data->>'phone';
+
+  insert into public.profiles (id, full_name, role, phone)
+  values (new.id, v_full_name, v_role, v_phone)
+  on conflict (id) do nothing;
+
+  if v_role = 'artisan' then
+    insert into public.artisan_profiles (id, trade)
+    values (new.id, coalesce(v_trade, 'Non spécifié'))
+    on conflict (id) do nothing;
+  end if;
+
+  return new;
+end;
+$$;
