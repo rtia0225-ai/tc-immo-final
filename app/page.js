@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import TrustBanner from "@/components/TrustBanner";
+import ConstructionWizard from "@/components/ConstructionWizard";
 import { CI_CITIES, CONSTRUCTION_SERVICES, HOUSE_TYPES, RECOMMENDATION_OPTIONS } from "@/lib/constants";
 
 const STEPS = [
@@ -37,6 +38,8 @@ export default async function HomePage() {
 
   return (
     <div>
+      <ConstructionWizard />
+
       {/* Hero : vraie photo, texte compact, bandeau de recherche qui chevauche */}
       <section className="relative">
         <div className="relative h-[420px] w-full overflow-hidden sm:h-[460px]">
