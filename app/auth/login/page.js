@@ -27,15 +27,13 @@ export default function LoginPage({ searchParams }) {
         </button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-gray-500">
-        Pas encore de compte ?{" "}
-        <Link
-          href={redirectTo ? `/auth/signup?redirect=${encodeURIComponent(redirectTo)}` : "/auth/signup"}
-          className="font-medium text-brand"
-        >
-          Créer un compte
-        </Link>
-      </p>
+      <p className="mt-6 text-center text-sm text-gray-500">Pas encore de compte ?</p>
+      <Link
+        href={redirectTo ? `/auth/signup?redirect=${encodeURIComponent(redirectTo)}` : "/auth/signup"}
+        className="mt-2 block rounded-lg border-2 border-forest py-3 text-center font-heading font-bold text-forest hover:bg-forest-light"
+      >
+        Créer un compte
+      </Link>
     </div>
   );
 }

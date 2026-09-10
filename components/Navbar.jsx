@@ -45,9 +45,9 @@ export default function Navbar({ user }) {
           ) : (
             <Link
               href="/auth/login"
-              className="rounded-md bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-brand-dark"
+              className="whitespace-nowrap rounded-md bg-brand px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-dark sm:text-sm"
             >
-              Se connecter / S'inscrire
+              Connexion / Inscription
             </Link>
           )}
         </div>
