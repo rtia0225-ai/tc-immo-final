@@ -6,10 +6,11 @@ export default async function ArtisansPage({ searchParams }) {
   const supabase = createClient();
   const { trade, city, recommendation, house_type } = searchParams || {};
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (house_type) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
     await supabase.from("search_analytics").insert({
       house_type,
       trade: trade || null,
@@ -48,6 +49,20 @@ export default async function ArtisansPage({ searchParams }) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
       <h1 className="font-heading text-2xl font-bold text-ink">Trouver un artisan</h1>
+
+      {!user && (
+        <div className="mt-4 flex flex-col items-center justify-between gap-3 rounded-lg bg-forest p-4 text-white sm:flex-row">
+          <p className="text-sm font-medium">
+            Crée un compte pour contacter un artisan, prendre rendez-vous ou démarrer un projet.
+          </p>
+          <Link
+            href="/auth/signup"
+            className="shrink-0 rounded-md bg-white px-5 py-2 text-sm font-bold text-forest hover:bg-gray-100"
+          >
+            Créer un compte
+          </Link>
+        </div>
+      )}
 
       <form action="/artisans" className="mt-6 grid gap-px overflow-hidden rounded-lg border border-gray-200 bg-gray-200 sm:grid-cols-4">
         <select name="trade" defaultValue={trade || ""} className="bg-white p-3 text-sm text-ink focus:outline-none">
