@@ -49,7 +49,66 @@ export async function createProject(formData) {
     .eq("artisan_id", artisanId)
     .is("project_id", null);
 
-  redirect(`/projects/${project.id}`);
+  // Génère le contrat tripartite, à signer par les deux parties avant
+  // le démarrage réel des travaux.
+  const { data: clientProfile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .single();
+  const { data: artisanData } = await supabase
+    .from("artisan_profiles")
+    .select("trade, profiles ( full_name )")
+    .eq("id", artisanId)
+    .single();
+
+  const contractContent = `CONTRAT DE PRESTATION — TC-IMMO
+
+Entre le client ${clientProfile?.full_name || ""} et le prestataire ${artisanData?.profiles?.full_name || ""} (${artisanData?.trade || ""}).
+
+Objet : ${title}
+Description : ${description || "Non précisée"}
+Montant convenu : ${amount} ${currency}
+
+Le paiement du client est séquestré sur la plateforme TC-Immo et libéré au prestataire au fur et à mesure de la validation des étapes du chantier convenues (Fondations, Dalle, Murs, Toiture, Finitions).
+
+En signant ce contrat, les deux parties reconnaissent avoir convenu de ces termes et acceptent de débuter les travaux dans ce cadre.`;
+
+  await supabase.from("contracts").insert({
+    project_id: project.id,
+    content: contractContent,
+  });
+
+  redirect(`/projects/${project.id}/contract`);
+}
+
+// Signature de consentement (horodatée) — pas une signature électronique
+// légale certifiée, juste une trace de l'accord de chaque partie.
+export async function signContract(formData) {
+  const supabase = createClient();
+  const contractId = formData.get("contractId");
+  const projectId = formData.get("projectId");
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/auth/login");
+
+  const { data: project } = await supabase
+    .from("projects")
+    .select("client_id, artisan_id")
+    .eq("id", projectId)
+    .single();
+
+  if (!project) redirect(`/projects/${projectId}/contract`);
+
+  const updates = {};
+  if (project.client_id === user.id) updates.client_signed_at = new Date().toISOString();
+  if (project.artisan_id === user.id) updates.artisan_signed_at = new Date().toISOString();
+
+  await supabase.from("contracts").update(updates).eq("id", contractId);
+
+  redirect(`/projects/${projectId}/contract`);
 }
 
 // NOTE : ceci ne fait qu'avancer le statut en base. L'intégration réelle

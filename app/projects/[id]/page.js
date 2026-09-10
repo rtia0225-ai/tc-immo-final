@@ -49,6 +49,13 @@ export default async function ProjectPage({ params }) {
     .eq("project_id", id)
     .maybeSingle();
 
+  const { data: contract } = await supabase
+    .from("contracts")
+    .select("client_signed_at, artisan_signed_at")
+    .eq("project_id", id)
+    .maybeSingle();
+  const contractFullySigned = !!contract?.client_signed_at && !!contract?.artisan_signed_at;
+
   const nextStatus = NEXT_STATUS[project.status];
 
   return (
@@ -57,6 +64,15 @@ export default async function ProjectPage({ params }) {
         {project.title}
       </h1>
       <p className="mb-6 text-gray-600">{project.description}</p>
+
+      {contract && !contractFullySigned && (
+        <Link
+          href={`/projects/${project.id}/contract`}
+          className="mb-6 block rounded-lg border border-brand bg-brand-light p-4 text-sm font-medium text-brand-dark hover:opacity-90"
+        >
+          Contrat en attente de signature — clique pour le consulter et signer
+        </Link>
+      )}
 
       {/* Paiements (escrow) */}
       <div className="mb-6 rounded-lg border border-brand-light bg-white p-5">
@@ -109,6 +125,16 @@ export default async function ProjectPage({ params }) {
           <p className="font-medium">Mes rendez-vous</p>
           <p className="text-sm text-gray-500">
             Planifier ou consulter un appel
+          </p>
+        </Link>
+
+        <Link
+          href={`/projects/${project.id}/contract`}
+          className="rounded-lg border border-brand-light bg-white p-4 hover:shadow-sm"
+        >
+          <p className="font-medium">Contrat</p>
+          <p className="text-sm text-gray-500">
+            {contractFullySigned ? "Signé par les deux parties" : "Voir et signer le contrat"}
           </p>
         </Link>
 

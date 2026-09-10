@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { updateArtisanProfile, addArtisanPhoto, deleteArtisanPhoto, uploadAvatar } from "./actions";
+import { uploadIdDocument } from "@/lib/idDocumentActions";
 import { CI_CITIES, CONSTRUCTION_SERVICES } from "@/lib/constants";
 import ShareLocationButton from "@/components/ShareLocationButton";
 
@@ -35,6 +36,16 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
 
   const selectedServices = artisan?.services || [];
   const selectedMobilityCities = artisan?.mobility_cities || [];
+
+  // URL temporaire (1h) pour afficher la pièce d'identité déjà envoyée —
+  // le bucket est privé, jamais d'URL publique permanente.
+  let idDocumentSignedUrl = null;
+  if (profile?.id_document_url) {
+    const { data } = await supabase.storage
+      .from("id-documents")
+      .createSignedUrl(profile.id_document_url, 3600);
+    idDocumentSignedUrl = data?.signedUrl || null;
+  }
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
@@ -85,6 +96,38 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
         </div>
         <p className="mt-2 text-xs text-gray-500">
           Choisis une photo depuis ton téléphone ou ton ordinateur — elle sera visible par les clients.
+        </p>
+      </section>
+
+      {/* Pièce d'identité, en dehors du formulaire principal (upload indépendant) */}
+      <section className="mt-8">
+        <h2 className="font-heading text-lg font-bold text-brand">Pièce d'identité</h2>
+        {idDocumentSignedUrl && (
+          <p className="mt-2 text-sm text-forest">
+            ✓ Document déjà envoyé —{" "}
+            <a href={idDocumentSignedUrl} target="_blank" rel="noreferrer" className="underline">
+              voir le fichier
+            </a>
+          </p>
+        )}
+        <form action={uploadIdDocument} className="mt-3 flex items-center gap-2">
+          <input type="hidden" name="returnTo" value="/dashboard/profile" />
+          <input
+            type="file"
+            name="idDocument"
+            accept="image/*,.pdf"
+            required
+            className="flex-1 text-sm"
+          />
+          <button
+            type="submit"
+            className="rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white hover:bg-forest-dark"
+          >
+            Envoyer
+          </button>
+        </form>
+        <p className="mt-2 text-xs text-gray-500">
+          Carte nationale d'identité, passeport ou équivalent. Jamais visible par les clients.
         </p>
       </section>
 

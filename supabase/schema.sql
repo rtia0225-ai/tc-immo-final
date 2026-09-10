@@ -497,3 +497,46 @@ create policy "envoyer sa propre note vocale" on storage.objects
 -- 16. NÉGOCIATION DE RENDEZ-VOUS (contre-propositions)
 -- ---------------------------------------------------------
 alter table appointments add column if not exists proposed_by uuid references profiles(id);
+
+-- ---------------------------------------------------------
+-- 17. PIÈCE D'IDENTITÉ (privée) ET CONTRATS SIGNÉS
+-- ---------------------------------------------------------
+alter table profiles add column if not exists id_document_url text;
+alter table profiles add column if not exists id_document_uploaded_at timestamptz;
+
+insert into storage.buckets (id, name, public)
+values ('id-documents', 'id-documents', false)
+on conflict (id) do nothing;
+
+create policy "voir sa propre piece d'identite" on storage.objects
+  for select using (
+    bucket_id = 'id-documents' and (storage.foldername(name))[1] = auth.uid()::text
+  );
+create policy "uploader sa propre piece d'identite" on storage.objects
+  for insert with check (
+    bucket_id = 'id-documents' and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create table contracts (
+  id uuid primary key default uuid_generate_v4(),
+  project_id uuid references projects(id) on delete cascade unique,
+  content text not null,
+  client_signed_at timestamptz,
+  artisan_signed_at timestamptz,
+  created_at timestamptz default now()
+);
+
+alter table contracts enable row level security;
+
+create policy "acces contrat participants" on contracts
+  for select using (
+    exists (select 1 from projects p where p.id = contracts.project_id and (p.client_id = auth.uid() or p.artisan_id = auth.uid()))
+  );
+create policy "signer le contrat" on contracts
+  for update using (
+    exists (select 1 from projects p where p.id = contracts.project_id and (p.client_id = auth.uid() or p.artisan_id = auth.uid()))
+  );
+create policy "creer le contrat a la creation du projet" on contracts
+  for insert with check (
+    exists (select 1 from projects p where p.id = contracts.project_id and p.client_id = auth.uid())
+  );
