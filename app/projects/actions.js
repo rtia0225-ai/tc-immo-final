@@ -4,9 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 // Étape "Sécurisez vos travaux" : le client valide un devis avec l'artisan,
-// ce qui crée le projet. Le statut part directement en "awaiting_payment"
-// (devis accepté, en attente du premier paiement) et les 5 étapes de
-// chronogramme standards se créent automatiquement (voir schema.sql).
+// ce qui crée le projet. Seul le client peut initier cette action (vérifié
+// aussi au niveau de la page /projects/new).
+// L'échéancier de paiement n'est plus générique : chaque étape saisie par
+// le client (titre + pourcentage) porte son propre montant, calculé sur
+// le montant total du projet.
 export async function createProject(formData) {
   const supabase = createClient();
 
@@ -15,11 +17,23 @@ export async function createProject(formData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
+  const { data: requesterProfile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (requesterProfile?.role === "artisan") {
+    redirect("/dashboard");
+  }
+
   const artisanId = formData.get("artisanId");
   const title = formData.get("title");
   const description = formData.get("description");
   const amount = formData.get("amount");
   const currency = formData.get("currency") || "XOF";
+
+  const milestoneTitles = formData.getAll("milestoneTitle");
+  const milestonePercentages = formData.getAll("milestonePercentage");
 
   const { data: project, error } = await supabase
     .from("projects")
@@ -39,6 +53,23 @@ export async function createProject(formData) {
     return redirect(
       `/projects/new?artisan=${artisanId}&error=${encodeURIComponent(error.message)}`
     );
+  }
+
+  // Crée l'échéancier de paiement tel que défini par le client
+  const totalAmount = Number(amount) || 0;
+  const milestoneRows = milestoneTitles.map((t, i) => {
+    const pct = Number(milestonePercentages[i]) || 0;
+    return {
+      project_id: project.id,
+      title: t,
+      order_index: i + 1,
+      payment_percentage: pct,
+      amount: Math.round((totalAmount * pct) / 100),
+    };
+  });
+
+  if (milestoneRows.length > 0) {
+    await supabase.from("project_milestones").insert(milestoneRows);
   }
 
   // Relie automatiquement la conversation existante à ce projet, si elle existe déjà
@@ -62,6 +93,10 @@ export async function createProject(formData) {
     .eq("id", artisanId)
     .single();
 
+  const scheduleText = milestoneRows
+    .map((m) => `  - ${m.title} : ${m.payment_percentage}% (${m.amount} ${currency})`)
+    .join("\n");
+
   const contractContent = `CONTRAT DE PRESTATION — TC-IMMO
 
 Entre le client ${clientProfile?.full_name || ""} et le prestataire ${artisanData?.profiles?.full_name || ""} (${artisanData?.trade || ""}).
@@ -70,7 +105,10 @@ Objet : ${title}
 Description : ${description || "Non précisée"}
 Montant convenu : ${amount} ${currency}
 
-Le paiement du client est séquestré sur la plateforme TC-Immo et libéré au prestataire au fur et à mesure de la validation des étapes du chantier convenues (Fondations, Dalle, Murs, Toiture, Finitions).
+Échéancier de paiement convenu :
+${scheduleText || "  (aucune étape définie)"}
+
+Le paiement du client est séquestré sur la plateforme TC-Immo. Chaque montant listé ci-dessus n'est libéré au prestataire qu'après validation, par l'artisan, de l'étape correspondante.
 
 En signant ce contrat, les deux parties reconnaissent avoir convenu de ces termes et acceptent de débuter les travaux dans ce cadre.`;
 
@@ -137,4 +175,3 @@ export async function advanceProjectStatus(formData) {
 
   redirect(`/projects/${projectId}`);
 }
-

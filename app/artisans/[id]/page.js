@@ -7,6 +7,20 @@ export default async function ArtisanProfilePage({ params }) {
   const supabase = createClient();
   const { id } = params;
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let viewerIsArtisan = false;
+  if (user) {
+    const { data: viewerProfile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    viewerIsArtisan = viewerProfile?.role === "artisan";
+  }
+
   const { data: artisan } = await supabase
     .from("artisan_profiles")
     .select(
@@ -117,8 +131,8 @@ export default async function ArtisanProfilePage({ params }) {
         )}
       </div>
 
-      {/* Actions */}
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+      {/* Actions — seul un client peut démarrer un projet */}
+      <div className={`mt-4 grid gap-3 ${viewerIsArtisan ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
         <Link
           href={`/appointments/new?artisan=${artisan.id}`}
           className="rounded-md bg-brand px-4 py-3 text-center text-sm font-bold text-white hover:bg-brand-dark"
@@ -131,12 +145,14 @@ export default async function ArtisanProfilePage({ params }) {
         >
           Message
         </Link>
-        <Link
-          href={`/projects/new?artisan=${artisan.id}`}
-          className="rounded-md bg-forest px-4 py-3 text-center text-sm font-bold text-white hover:bg-forest-dark"
-        >
-          Démarrer un projet
-        </Link>
+        {!viewerIsArtisan && (
+          <Link
+            href={`/projects/new?artisan=${artisan.id}`}
+            className="rounded-md bg-forest px-4 py-3 text-center text-sm font-bold text-white hover:bg-forest-dark"
+          >
+            Démarrer un projet
+          </Link>
+        )}
       </div>
 
       {/* Avis */}

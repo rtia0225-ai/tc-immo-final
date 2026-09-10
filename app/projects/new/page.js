@@ -2,6 +2,7 @@ import { createProject } from "../actions";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { uploadIdDocument } from "@/lib/idDocumentActions";
+import MilestoneBuilder from "@/components/MilestoneBuilder";
 
 export default async function NewProjectPage({ searchParams }) {
   const artisanId = searchParams?.artisan;
@@ -17,9 +18,14 @@ export default async function NewProjectPage({ searchParams }) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id_document_url")
+    .select("id_document_url, role")
     .eq("id", user.id)
     .single();
+
+  // Seul un client peut démarrer un projet — pas l'artisan.
+  if (profile?.role === "artisan") {
+    redirect("/dashboard");
+  }
 
   const { data: artisan } = await supabase
     .from("artisan_profiles")
@@ -73,9 +79,9 @@ export default async function NewProjectPage({ searchParams }) {
         </p>
       )}
       <p className="mt-3 text-sm text-gray-500">
-        Renseigne les termes convenus avec l'artisan (après devis). Un projet
-        sera créé avec un chronogramme standard, et le paiement restera
-        séquestré jusqu'à validation de chaque étape.
+        Renseigne les termes convenus avec l'artisan (après devis), y compris
+        l'échéancier de paiement par étape. Le paiement reste séquestré et
+        n'est libéré, étape par étape, qu'après validation par l'artisan.
       </p>
 
       {searchParams?.error && (
@@ -108,7 +114,7 @@ export default async function NewProjectPage({ searchParams }) {
 
         <div>
           <label className="mb-1 block text-sm font-medium">
-            Montant convenu ({artisan?.currency || "XOF"})
+            Montant total convenu ({artisan?.currency || "XOF"})
           </label>
           <input
             type="number"
@@ -118,6 +124,10 @@ export default async function NewProjectPage({ searchParams }) {
             step="0.01"
             className="w-full rounded-lg border border-gray-300 p-2"
           />
+        </div>
+
+        <div className="border-t border-gray-100 pt-4">
+          <MilestoneBuilder />
         </div>
 
         <button

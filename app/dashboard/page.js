@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { logout } from "../auth/actions";
+import ProjectTimeline from "@/components/ProjectTimeline";
 
 const CLIENT_TABS = [
   { key: "projets", label: "Mes projets" },
@@ -178,26 +179,20 @@ export default async function DashboardPage({ searchParams }) {
               <div className="rounded-lg border border-gray-200 bg-white p-5">
                 <p className="font-heading font-bold">{activeProject.title}</p>
 
-                <div className="mt-4 flex items-center justify-between">
-                  {milestones.map((m, i) => (
-                    <div key={m.id} className="flex flex-1 flex-col items-center text-center">
-                      <div
-                        className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
-                          m.is_completed ? "bg-forest text-white" : "bg-gray-200 text-gray-500"
-                        }`}
-                      >
-                        {m.is_completed ? "✓" : i + 1}
-                      </div>
-                      <p className="mt-1 text-[10px] text-gray-500">{m.title}</p>
-                    </div>
-                  ))}
+                <div className="mt-4">
+                  <ProjectTimeline
+                    projectId={activeProject.id}
+                    milestones={milestones}
+                    isArtisan={true}
+                    currency={activeProject.currency}
+                  />
                 </div>
 
                 <Link
                   href={`/projects/${activeProject.id}`}
-                  className="mt-5 block rounded-lg bg-forest py-2 text-center text-xs font-semibold text-white hover:bg-forest-dark"
+                  className="mt-4 block rounded-lg bg-forest py-2 text-center text-xs font-semibold text-white hover:bg-forest-dark"
                 >
-                  Ouvrir le projet (cocher les étapes, documents, messagerie, paiements)
+                  Ouvrir le projet (documents, messagerie)
                 </Link>
               </div>
             ) : (
@@ -248,30 +243,21 @@ export default async function DashboardPage({ searchParams }) {
                       </Link>
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between">
-                      {milestones.map((m, i) => (
-                        <div key={m.id} className="flex flex-1 flex-col items-center text-center">
-                          <div
-                            className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
-                              m.is_completed ? "bg-forest text-white" : "bg-gray-200 text-gray-500"
-                            }`}
-                          >
-                            {m.is_completed ? "✓" : i + 1}
-                          </div>
-                          <p className="mt-1 text-[10px] text-gray-500">{m.title}</p>
-                        </div>
-                      ))}
+                    <div className="mt-4">
+                      <ProjectTimeline
+                        projectId={activeProject.id}
+                        milestones={milestones}
+                        isArtisan={false}
+                        currency={activeProject.currency}
+                      />
                     </div>
 
-                    <div className="mt-5 grid grid-cols-3 gap-2">
+                    <div className="mt-4 grid grid-cols-2 gap-2">
                       <Link href={`/projects/${activeProject.id}`} className="rounded-lg border border-gray-200 py-2 text-center text-xs font-medium hover:bg-gray-50">
                         Documents
                       </Link>
                       <Link href={`/projects/${activeProject.id}`} className="rounded-lg bg-forest py-2 text-center text-xs font-medium text-white hover:bg-forest-dark">
                         Messagerie
-                      </Link>
-                      <Link href={`/projects/${activeProject.id}`} className="rounded-lg bg-brand py-2 text-center text-xs font-medium text-white hover:bg-brand-dark">
-                        Paiements
                       </Link>
                     </div>
                   </div>

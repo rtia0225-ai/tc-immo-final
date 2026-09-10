@@ -546,3 +546,14 @@ create policy "creer le contrat a la creation du projet" on contracts
 -- ---------------------------------------------------------
 alter table artisan_profiles add column if not exists mobile_money_operator text;
 alter table artisan_profiles add column if not exists mobile_money_number text;
+
+-- ---------------------------------------------------------
+-- 18. ÉCHÉANCIER DE PAIEMENT PERSONNALISÉ (remplace les étapes
+-- génériques automatiques — chaque projet a ses propres paliers,
+-- définis par le client selon le contrat convenu avec l'artisan)
+-- ---------------------------------------------------------
+alter table project_milestones add column if not exists payment_percentage numeric(5,2);
+alter table project_milestones add column if not exists amount numeric(12,2);
+alter table project_milestones add column if not exists paid_at timestamptz;
+
+drop trigger if exists on_project_created on projects;

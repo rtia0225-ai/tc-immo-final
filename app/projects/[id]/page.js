@@ -103,6 +103,7 @@ export default async function ProjectPage({ params }) {
           projectId={project.id}
           milestones={milestones}
           isArtisan={isArtisan}
+          currency={project.currency}
         />
       </div>
 

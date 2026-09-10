@@ -44,3 +44,36 @@ export async function toggleMilestone(formData) {
 
   redirect(`/projects/${projectId}`);
 }
+
+// Le client confirme avoir effectué le virement pour une étape validée par
+// l'artisan. Manuel pour l'instant (pas de prestataire de paiement branché
+// encore) — enregistre juste la date à laquelle le paiement a été fait.
+export async function releasePayment(formData) {
+  const supabase = createClient();
+  const milestoneId = formData.get("milestoneId");
+  const projectId = formData.get("projectId");
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/auth/login");
+
+  const { data: project } = await supabase
+    .from("projects")
+    .select("client_id")
+    .eq("id", projectId)
+    .single();
+
+  // Seul le client du projet peut confirmer avoir payé, et uniquement
+  // pour une étape déjà validée par l'artisan.
+  if (project?.client_id !== user.id) redirect(`/projects/${projectId}`);
+
+  await supabase
+    .from("project_milestones")
+    .update({ paid_at: new Date().toISOString() })
+    .eq("id", milestoneId)
+    .eq("is_completed", true);
+
+  redirect(`/projects/${projectId}`);
+}
+
