@@ -4,7 +4,7 @@ export default function Footer() {
       <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2">
         <div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-white.png" alt="TC-Immo" className="h-10 w-auto" />
+          <img src="/logo-footer.png" alt="TC-Immo" className="h-10 w-auto" />
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-gray-400">
             La marketplace de confiance pour construire en Côte d'Ivoire depuis l'étranger.
           </p>

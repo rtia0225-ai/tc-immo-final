@@ -24,7 +24,7 @@ export default function Navbar({ user }) {
           </button>
           <Link href="/" className="flex items-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-black.png" alt="TC-Immo" className="h-10 w-auto" />
+            <img src="/logo-navbar.png" alt="TC-Immo" className="h-10 w-auto" />
           </Link>
         </div>
 
