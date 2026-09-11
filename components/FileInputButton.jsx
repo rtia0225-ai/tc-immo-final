@@ -12,6 +12,7 @@ export default function FileInputButton({
   multiple,
   label = "Choisir un fichier",
   className = "",
+  autoSubmit = false,
 }) {
   const inputRef = useRef(null);
   const [fileNames, setFileNames] = useState("");
@@ -20,10 +21,15 @@ export default function FileInputButton({
     const files = e.target.files;
     if (!files || files.length === 0) {
       setFileNames("");
-    } else if (files.length === 1) {
+      return;
+    }
+    if (files.length === 1) {
       setFileNames(files[0].name);
     } else {
       setFileNames(`${files.length} fichiers sélectionnés`);
+    }
+    if (autoSubmit) {
+      e.target.form?.requestSubmit();
     }
   };
 

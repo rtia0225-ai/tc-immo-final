@@ -80,13 +80,7 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
             </div>
           )}
           <form action={uploadAvatar} className="flex items-center gap-2">
-            <FileInputButton name="avatar" accept="image/*" required label="Choisir une photo" />
-            <button
-              type="submit"
-              className="shrink-0 rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white hover:bg-forest-dark"
-            >
-              Envoyer
-            </button>
+            <FileInputButton name="avatar" accept="image/*" required label="Choisir une photo" autoSubmit />
           </form>
         </div>
         <p className="mt-2 text-xs text-gray-500">
