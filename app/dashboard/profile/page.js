@@ -70,7 +70,7 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
           {profile?.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={profile.avatar_url}
+              src={`${profile.avatar_url}?v=${Date.now()}`}
               alt="Photo de profil"
               className="h-20 w-20 rounded-full object-cover"
             />

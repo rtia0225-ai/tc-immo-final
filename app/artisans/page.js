@@ -106,7 +106,7 @@ export default async function ArtisansPage({ searchParams }) {
                 {a.profiles?.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={a.profiles.avatar_url}
+                    src={`${a.profiles.avatar_url}?v=${Date.now()}`}
                     alt={a.profiles?.full_name}
                     className="h-12 w-12 shrink-0 rounded-full object-cover"
                   />

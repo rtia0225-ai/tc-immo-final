@@ -138,7 +138,7 @@ export default async function HomePage() {
                 {a.profiles?.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={a.profiles.avatar_url}
+                    src={`${a.profiles.avatar_url}?v=${Date.now()}`}
                     alt={a.profiles?.full_name}
                     className="h-40 w-full object-cover"
                   />

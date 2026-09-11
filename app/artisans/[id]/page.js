@@ -60,7 +60,7 @@ export default async function ArtisanProfilePage({ params }) {
         {artisan.profiles?.avatar_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={artisan.profiles.avatar_url}
+            src={`${artisan.profiles.avatar_url}?v=${Date.now()}`}
             alt={artisan.profiles?.full_name}
             className="h-20 w-20 shrink-0 rounded-full object-cover"
           />
