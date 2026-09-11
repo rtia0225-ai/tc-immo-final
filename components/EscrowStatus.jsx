@@ -37,11 +37,6 @@ export default function EscrowStatus({ status, amount, currency }) {
           </span>
         ))}
       </div>
-      <p className="mt-3 text-xs text-gray-500">
-        Note technique : la logique réelle de séquestre (retenue et
-        libération des fonds) doit être branchée à un prestataire de
-        paiement — voir README pour l'intégration Stripe Connect / CinetPay.
-      </p>
     </div>
   );
 }

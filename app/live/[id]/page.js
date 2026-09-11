@@ -44,11 +44,6 @@ export default async function LiveFeedPage({ params }) {
           Le chantier n'est pas en direct actuellement.
         </div>
       )}
-
-      <p className="mt-4 text-xs text-gray-500">
-        Prestataire configuré : {feed?.provider || "aucun"}. Voir le README
-        pour brancher un vrai service de streaming.
-      </p>
     </div>
   );
 }

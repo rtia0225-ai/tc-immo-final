@@ -86,10 +86,6 @@ export default async function ContractPage({ params }) {
         </form>
       )}
 
-      <p className="mt-4 text-xs text-gray-400">
-        Signature de consentement horodatée — ne remplace pas une signature électronique légale certifiée.
-      </p>
-
       <Link href={`/projects/${project.id}`} className="mt-6 inline-block text-sm text-brand hover:underline">
         ← Retour au projet
       </Link>

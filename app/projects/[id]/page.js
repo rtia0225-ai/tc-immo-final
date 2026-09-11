@@ -142,7 +142,7 @@ export default async function ProjectPage({ params }) {
         <div className="rounded-lg border border-brand-light bg-white p-4">
           <p className="font-medium">Mes documents</p>
           <p className="text-sm text-gray-500">
-            Bientôt : dépôt et partage de documents liés au projet
+            Devis, plans et pièces liées au projet
           </p>
         </div>
 

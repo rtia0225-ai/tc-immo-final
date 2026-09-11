@@ -312,7 +312,7 @@ export default async function DashboardPage({ searchParams }) {
 
             {activeTab === "documents" && (
               <p className="text-gray-500">
-                Bientôt : dépôt et partage de documents liés à tes projets.
+                Devis, plans et pièces liées à tes projets.
               </p>
             )}
           </div>
