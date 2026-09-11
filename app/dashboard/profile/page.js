@@ -5,6 +5,7 @@ import { uploadIdDocument } from "@/lib/idDocumentActions";
 import { CI_CITIES, CONSTRUCTION_SERVICES, ID_DOCUMENT_TYPES, MOBILE_MONEY_OPERATORS } from "@/lib/constants";
 import ShareLocationButton from "@/components/ShareLocationButton";
 import FileInputButton from "@/components/FileInputButton";
+import TradeAndServices from "@/components/TradeAndServices";
 
 export default async function ArtisanProfileEditPage({ searchParams }) {
   const supabase = createClient();
@@ -239,37 +240,7 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
           <h2 className="font-heading text-lg font-bold text-brand">Profil visible par les clients</h2>
 
           <div className="mt-4 flex flex-col gap-4">
-            <div>
-              <label className="mb-1 block text-sm font-medium">Métier principal</label>
-              <select
-                name="trade"
-                defaultValue={artisan?.trade || ""}
-                required
-                className="w-full rounded-lg border border-gray-300 p-2"
-              >
-                <option value="" disabled>Choisir un métier</option>
-                {CONSTRUCTION_SERVICES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium">Services proposés (plusieurs choix possibles)</label>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {CONSTRUCTION_SERVICES.map((s) => (
-                  <label key={s} className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      name="services"
-                      value={s}
-                      defaultChecked={selectedServices.includes(s)}
-                    />
-                    {s}
-                  </label>
-                ))}
-              </div>
-            </div>
+            <TradeAndServices initialTrade={artisan?.trade || ""} initialServices={selectedServices} />
 
             <div>
               <label className="mb-2 block text-sm font-medium">Mobilité</label>

@@ -1,6 +1,7 @@
 import { signup } from "../actions";
 import Link from "next/link";
 import { CI_CITIES, CONSTRUCTION_SERVICES, MOBILE_MONEY_OPERATORS } from "@/lib/constants";
+import TradeAndServices from "@/components/TradeAndServices";
 
 export default function SignupPage({ searchParams }) {
   const role = searchParams?.role; // 'client' ou 'artisan', choisi à l'étape précédente
@@ -131,27 +132,7 @@ export default function SignupPage({ searchParams }) {
                 Profil visible par les clients
               </p>
 
-              <div>
-                <label className="mb-1 block text-sm font-medium">Métier principal</label>
-                <select name="trade" required defaultValue="" className="w-full rounded-lg border border-gray-300 p-2">
-                  <option value="" disabled>Choisir un métier</option>
-                  {CONSTRUCTION_SERVICES.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium">Services proposés (plusieurs choix possibles)</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {CONSTRUCTION_SERVICES.map((s) => (
-                    <label key={s} className="flex items-center gap-2 text-sm">
-                      <input type="checkbox" name="services" value={s} />
-                      {s}
-                    </label>
-                  ))}
-                </div>
-              </div>
+              <TradeAndServices />
 
               <div>
                 <label className="mb-2 block text-sm font-medium">Mobilité</label>
