@@ -52,7 +52,7 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/10" />
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white">
             <h1 className="font-heading max-w-xl text-3xl font-extrabold leading-tight sm:text-4xl">
-              Construisez chez vous, en toute sécurité, depuis l'étranger
+              Construisez chez vous, en toute sécurité, depuis partout
             </h1>
             <p className="mt-3 max-w-md text-sm text-white/90 sm:text-base">
               TC-Immo connecte la diaspora à des artisans vérifiés en Côte d'Ivoire.
