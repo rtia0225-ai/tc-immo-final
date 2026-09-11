@@ -641,3 +641,80 @@ end;
 $$;
 
 grant execute on function public.delete_own_account() to authenticated;
+
+-- ---------------------------------------------------------
+-- 23. INSCRIPTION EN UNE SEULE ÉTAPE (tous les champs de profil artisan
+-- directement à l'inscription, plus besoin de repasser par "Modifier
+-- mon profil" pour l'essentiel — seuls les fichiers restent une étape
+-- séparée, ils ne peuvent techniquement pas être envoyés avant que le
+-- compte existe).
+-- ---------------------------------------------------------
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_full_name text;
+  v_role user_role;
+  v_trade text;
+  v_phone text;
+  v_city text;
+  v_bio text;
+  v_years_experience int;
+  v_pricing_info text;
+  v_mobility_scope mobility_scope;
+  v_mobility_cities text[];
+  v_services text[];
+  v_emergency_contact_name text;
+  v_emergency_contact_phone text;
+  v_mobile_money_operator text;
+  v_mobile_money_number text;
+begin
+  v_full_name := coalesce(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1));
+  v_role := coalesce((new.raw_user_meta_data->>'role')::user_role, 'client');
+  v_trade := new.raw_user_meta_data->>'trade';
+  v_phone := new.raw_user_meta_data->>'phone';
+  v_city := new.raw_user_meta_data->>'city';
+  v_bio := new.raw_user_meta_data->>'bio';
+  v_years_experience := nullif(new.raw_user_meta_data->>'years_experience', '')::int;
+  v_pricing_info := new.raw_user_meta_data->>'pricing_info';
+  v_mobility_scope := nullif(new.raw_user_meta_data->>'mobility_scope', '')::mobility_scope;
+  v_emergency_contact_name := new.raw_user_meta_data->>'emergency_contact_name';
+  v_emergency_contact_phone := new.raw_user_meta_data->>'emergency_contact_phone';
+  v_mobile_money_operator := new.raw_user_meta_data->>'mobile_money_operator';
+  v_mobile_money_number := new.raw_user_meta_data->>'mobile_money_number';
+
+  select array(select jsonb_array_elements_text(new.raw_user_meta_data->'mobility_cities'))
+    into v_mobility_cities;
+  select array(select jsonb_array_elements_text(new.raw_user_meta_data->'services'))
+    into v_services;
+
+  insert into public.profiles (
+    id, full_name, role, phone, city,
+    emergency_contact_name, emergency_contact_phone
+  )
+  values (
+    new.id, v_full_name, v_role, v_phone, v_city,
+    v_emergency_contact_name, v_emergency_contact_phone
+  )
+  on conflict (id) do nothing;
+
+  if v_role = 'artisan' then
+    insert into public.artisan_profiles (
+      id, trade, bio, years_experience, pricing_info,
+      mobility_scope, mobility_cities, services,
+      mobile_money_operator, mobile_money_number
+    )
+    values (
+      new.id, coalesce(v_trade, 'Non spécifié'), v_bio, coalesce(v_years_experience, 0), v_pricing_info,
+      coalesce(v_mobility_scope, 'selected'), coalesce(v_mobility_cities, '{}'), coalesce(v_services, '{}'),
+      v_mobile_money_operator, v_mobile_money_number
+    )
+    on conflict (id) do nothing;
+  end if;
+
+  return new;
+end;
+$$;

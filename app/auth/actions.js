@@ -12,14 +12,27 @@ export async function signup(formData) {
   const password = formData.get("password");
   const fullName = formData.get("fullName");
   const role = formData.get("role"); // 'client' ou 'artisan'
-  const trade = formData.get("trade"); // uniquement si artisan
+  const city = formData.get("city");
   const redirectTo = formData.get("redirect"); // page à retrouver après connexion
+
+  // Champs supplémentaires, uniquement utilisés si artisan
+  const trade = formData.get("trade");
+  const bio = formData.get("bio");
+  const yearsExperience = formData.get("yearsExperience");
+  const pricingInfo = formData.get("pricingInfo");
+  const mobilityScope = formData.get("mobilityScope");
+  const mobilityCities = formData.getAll("mobilityCities");
+  const services = formData.getAll("services");
+  const emergencyContactName = formData.get("emergencyContactName");
+  const emergencyContactPhone = formData.get("emergencyContactPhone");
+  const mobileMoneyOperator = formData.get("mobileMoneyOperator");
+  const mobileMoneyNumber = formData.get("mobileMoneyNumber");
 
   const { email, phone } = toAuthIdentity(identifier);
 
-  // On stocke nom/rôle/métier/téléphone dans les métadonnées du compte :
-  // elles survivent même si la confirmation d'email retarde la création
-  // du profil en base de données.
+  // Tout part dans les métadonnées du compte : le déclencheur en base de
+  // données crée le profil complet (client ou artisan) automatiquement,
+  // même si la confirmation d'email retarde la création d'une session.
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -27,8 +40,19 @@ export async function signup(formData) {
       data: {
         full_name: fullName,
         role,
-        trade,
         phone,
+        city,
+        trade,
+        bio,
+        years_experience: yearsExperience,
+        pricing_info: pricingInfo,
+        mobility_scope: mobilityScope,
+        mobility_cities: mobilityCities,
+        services,
+        emergency_contact_name: emergencyContactName,
+        emergency_contact_phone: emergencyContactPhone,
+        mobile_money_operator: mobileMoneyOperator,
+        mobile_money_number: mobileMoneyNumber,
       },
     },
   });
@@ -43,26 +67,38 @@ export async function signup(formData) {
   const userId = data.user?.id;
   if (userId) {
     // Tentative immédiate (fonctionne si aucune confirmation d'email
-    // n'est requise). Si ça échoue silencieusement, ensureProfile()
-    // rattrapera ça à la connexion.
+    // n'est requise). Si ça échoue silencieusement, le déclencheur en
+    // base de données (ou ensureProfile() à la connexion) rattrape ça.
     await supabase.from("profiles").insert({
       id: userId,
       full_name: fullName,
       role,
       phone,
+      city,
+      emergency_contact_name: emergencyContactName,
+      emergency_contact_phone: emergencyContactPhone,
     });
 
     if (role === "artisan") {
       await supabase.from("artisan_profiles").insert({
         id: userId,
         trade: trade || "Non spécifié",
+        bio,
+        years_experience: yearsExperience ? Number(yearsExperience) : 0,
+        pricing_info: pricingInfo,
+        mobility_scope: mobilityScope || "selected",
+        mobility_cities: mobilityScope === "selected" ? mobilityCities : [],
+        services,
+        mobile_money_operator: mobileMoneyOperator || null,
+        mobile_money_number: mobileMoneyNumber || null,
       });
     }
   }
 
-  const confirmUrl = redirectTo
-    ? `/auth/confirm-email?redirect=${encodeURIComponent(redirectTo)}`
-    : "/auth/confirm-email";
+  const confirmParams = new URLSearchParams();
+  if (role) confirmParams.set("role", role);
+  if (redirectTo) confirmParams.set("redirect", redirectTo);
+  const confirmUrl = `/auth/confirm-email${confirmParams.toString() ? `?${confirmParams.toString()}` : ""}`;
   redirect(confirmUrl);
 }
 
