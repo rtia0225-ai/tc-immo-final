@@ -61,7 +61,7 @@ export default async function HomePage() {
         </div>
 
         {/* Bandeau de recherche dense, pratique, qui chevauche le bas du hero */}
-        <div className="relative z-10 mx-auto -mt-8 max-w-5xl px-4">
+        <div className="relative z-10 mx-auto -mt-8 max-w-6xl px-4">
           <form
             action="/artisans"
             className="grid gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200 shadow-lg sm:grid-cols-5"

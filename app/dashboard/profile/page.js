@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { updateArtisanProfile, addArtisanPhoto, deleteArtisanPhoto, uploadAvatar } from "./actions";
 import { uploadIdDocument } from "@/lib/idDocumentActions";
-import { CI_CITIES, CONSTRUCTION_SERVICES } from "@/lib/constants";
+import { CI_CITIES, CONSTRUCTION_SERVICES, ID_DOCUMENT_TYPES } from "@/lib/constants";
 import ShareLocationButton from "@/components/ShareLocationButton";
 
 export default async function ArtisanProfileEditPage({ searchParams }) {
@@ -104,27 +104,46 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
         <h2 className="font-heading text-lg font-bold text-brand">Pièce d'identité</h2>
         {idDocumentSignedUrl && (
           <p className="mt-2 text-sm text-forest">
-            ✓ Document déjà envoyé —{" "}
+            ✓ Document déjà envoyé{profile?.id_document_type ? ` (${profile.id_document_type}${profile.id_document_number ? ` n° ${profile.id_document_number}` : ""})` : ""} —{" "}
             <a href={idDocumentSignedUrl} target="_blank" rel="noreferrer" className="underline">
               voir le fichier
             </a>
           </p>
         )}
-        <form action={uploadIdDocument} className="mt-3 flex items-center gap-2">
+        <form action={uploadIdDocument} className="mt-3 flex flex-col gap-2">
           <input type="hidden" name="returnTo" value="/dashboard/profile" />
-          <input
-            type="file"
-            name="idDocument"
-            accept="image/*,.pdf"
+          <select
+            name="documentType"
             required
-            className="flex-1 text-sm"
-          />
-          <button
-            type="submit"
-            className="rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white hover:bg-forest-dark"
+            defaultValue=""
+            className="rounded-lg border border-gray-300 p-2 text-sm"
           >
-            Envoyer
-          </button>
+            <option value="" disabled>Type de pièce</option>
+            {ID_DOCUMENT_TYPES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+          <input
+            name="documentNumber"
+            required
+            placeholder="Numéro de la pièce"
+            className="rounded-lg border border-gray-300 p-2 text-sm"
+          />
+          <div className="flex items-center gap-2">
+            <input
+              type="file"
+              name="idDocument"
+              accept="image/*,.pdf"
+              required
+              className="flex-1 text-sm"
+            />
+            <button
+              type="submit"
+              className="rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white hover:bg-forest-dark"
+            >
+              Envoyer
+            </button>
+          </div>
         </form>
         <p className="mt-2 text-xs text-gray-500">
           Carte nationale d'identité, passeport ou équivalent. Jamais visible par les clients.

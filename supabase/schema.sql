@@ -603,3 +603,9 @@ create policy "client cree le chronogramme" on project_milestones
   for insert with check (
     exists (select 1 from projects p where p.id = project_milestones.project_id and p.client_id = auth.uid())
   );
+
+-- ---------------------------------------------------------
+-- 21. TYPE ET NUMÉRO DE PIÈCE D'IDENTITÉ
+-- ---------------------------------------------------------
+alter table profiles add column if not exists id_document_type text;
+alter table profiles add column if not exists id_document_number text;

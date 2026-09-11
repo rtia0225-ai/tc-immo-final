@@ -53,22 +53,31 @@ export default function Navbar({ user }) {
       </nav>
 
       {menuOpen && (
-        <div className="border-t border-gray-100 bg-white px-4 py-3">
-          <div className="mx-auto flex max-w-6xl flex-col gap-1 text-sm font-medium text-ink">
-            <Link href="/a-propos" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
-              À propos
-            </Link>
-            <Link href="/comment-ca-marche" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
-              Comment ça marche
-            </Link>
-            <Link href="/ressources" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
-              Ressources
-            </Link>
-            <Link href="/faq" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
-              FAQ
-            </Link>
+        <>
+          {/* Zone invisible : toucher n'importe où ailleurs referme le menu */}
+          <button
+            type="button"
+            aria-label="Fermer le menu"
+            onClick={() => setMenuOpen(false)}
+            className="fixed inset-0 z-20 cursor-default"
+          />
+          <div className="relative z-30 border-t border-gray-100 bg-white px-4 py-3">
+            <div className="mx-auto flex max-w-6xl flex-col gap-1 text-sm font-medium text-ink">
+              <Link href="/a-propos" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
+                À propos
+              </Link>
+              <Link href="/comment-ca-marche" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
+                Comment ça marche
+              </Link>
+              <Link href="/ressources" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
+                Ressources
+              </Link>
+              <Link href="/faq" className="rounded px-2 py-2 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
+                FAQ
+              </Link>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </header>
   );

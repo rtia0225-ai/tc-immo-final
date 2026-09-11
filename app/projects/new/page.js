@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { uploadIdDocument } from "@/lib/idDocumentActions";
 import MilestoneBuilder from "@/components/MilestoneBuilder";
+import { ID_DOCUMENT_TYPES } from "@/lib/constants";
 
 export default async function NewProjectPage({ searchParams }) {
   const artisanId = searchParams?.artisan;
@@ -49,6 +50,23 @@ export default async function NewProjectPage({ searchParams }) {
 
         <form action={uploadIdDocument} className="mt-6 flex flex-col gap-3">
           <input type="hidden" name="returnTo" value={currentPath} />
+          <select
+            name="documentType"
+            required
+            defaultValue=""
+            className="w-full rounded-lg border border-gray-300 p-2 text-sm"
+          >
+            <option value="" disabled>Type de pièce</option>
+            {ID_DOCUMENT_TYPES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+          <input
+            name="documentNumber"
+            required
+            placeholder="Numéro de la pièce"
+            className="w-full rounded-lg border border-gray-300 p-2 text-sm"
+          />
           <input
             type="file"
             name="idDocument"
