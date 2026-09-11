@@ -128,12 +128,12 @@ export default async function HomePage() {
         {!artisans || artisans.length === 0 ? (
           <p className="mt-6 text-gray-500">Aucun artisan pour le moment.</p>
         ) : (
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 flex gap-4 overflow-x-auto pb-2">
             {artisans.map((a) => (
               <Link
                 key={a.id}
                 href={`/artisans/${a.id}`}
-                className="group overflow-hidden rounded-lg border border-gray-200 bg-white hover:shadow-md"
+                className="group w-60 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-white hover:shadow-md"
               >
                 {a.profiles?.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
