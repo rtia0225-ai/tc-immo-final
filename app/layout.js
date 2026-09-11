@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "TC-Immo — Construire en Côte d'Ivoire, en toute sécurité",
+  title: "TC-Immo",
   description:
     "Soyez maître de vos travaux : trouvez votre artisan, suivez vos travaux en temps réel, payez à votre rythme.",
 };
