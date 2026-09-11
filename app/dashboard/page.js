@@ -318,6 +318,12 @@ export default async function DashboardPage({ searchParams }) {
           </div>
         </>
       )}
+
+      <div className="mt-10 border-t border-gray-100 pt-4 text-center">
+        <Link href="/dashboard/delete-account" className="text-xs text-gray-400 hover:text-red-600">
+          Supprimer mon compte
+        </Link>
+      </div>
     </div>
   );
 }

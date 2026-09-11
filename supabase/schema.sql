@@ -609,3 +609,35 @@ create policy "client cree le chronogramme" on project_milestones
 -- ---------------------------------------------------------
 alter table profiles add column if not exists id_document_type text;
 alter table profiles add column if not exists id_document_number text;
+
+-- ---------------------------------------------------------
+-- 22. SUPPRESSION DE COMPTE (bloquée si projet en cours)
+-- ---------------------------------------------------------
+create or replace function public.delete_own_account()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_active_count int;
+begin
+  if v_uid is null then
+    raise exception 'Non authentifié.';
+  end if;
+
+  select count(*) into v_active_count
+  from projects
+  where (client_id = v_uid or artisan_id = v_uid)
+    and status not in ('released', 'cancelled');
+
+  if v_active_count > 0 then
+    raise exception 'Impossible de supprimer le compte : un projet est encore en cours.';
+  end if;
+
+  delete from auth.users where id = v_uid;
+end;
+$$;
+
+grant execute on function public.delete_own_account() to authenticated;
