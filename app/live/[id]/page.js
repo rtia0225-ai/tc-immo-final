@@ -1,15 +1,27 @@
 import { createClient } from "@/lib/supabase/server";
-
-// NOTE IMPORTANTE :
-// Cette page affiche la structure d'un flux caméra live, mais ne diffuse
-// pas de vidéo par elle-même — la diffusion réelle nécessite un
-// prestataire de streaming (ex: Mux, Daily.co, Agora, Livepeer).
-// playback_url doit contenir l'URL fournie par ce prestataire
-// (souvent un flux HLS .m3u8 ou un embed iframe).
+import { redirect } from "next/navigation";
 
 export default async function LiveFeedPage({ params }) {
   const supabase = createClient();
   const { id: projectId } = params;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/auth/login");
+
+  const { data: project } = await supabase
+    .from("projects")
+    .select("client_id, artisan_id")
+    .eq("id", projectId)
+    .single();
+
+  if (!project) return <p className="px-4 py-12">Projet introuvable.</p>;
+
+  // Le flux caméra est réservé au client, pour suivre son chantier.
+  if (user.id !== project.client_id) {
+    redirect(`/projects/${projectId}`);
+  }
 
   const { data: feed } = await supabase
     .from("camera_feeds")
