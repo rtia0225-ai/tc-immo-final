@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { updateArtisanProfile, addArtisanPhoto, deleteArtisanPhoto, uploadAvatar } from "./actions";
 import { uploadIdDocument } from "@/lib/idDocumentActions";
-import { CI_CITIES, CONSTRUCTION_SERVICES, ID_DOCUMENT_TYPES } from "@/lib/constants";
+import { CI_CITIES, CONSTRUCTION_SERVICES, ID_DOCUMENT_TYPES, MOBILE_MONEY_OPERATORS } from "@/lib/constants";
 import ShareLocationButton from "@/components/ShareLocationButton";
 
 export default async function ArtisanProfileEditPage({ searchParams }) {
@@ -213,6 +213,31 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium">Comment recevoir tes paiements</label>
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  name="mobileMoneyOperator"
+                  defaultValue={artisan?.mobile_money_operator || ""}
+                  className="rounded-lg border border-gray-300 p-2"
+                >
+                  <option value="" disabled>Choisir</option>
+                  {MOBILE_MONEY_OPERATORS.map((op) => (
+                    <option key={op} value={op}>{op}</option>
+                  ))}
+                </select>
+                <input
+                  name="mobileMoneyNumber"
+                  defaultValue={artisan?.mobile_money_number || ""}
+                  placeholder="Numéro"
+                  className="rounded-lg border border-gray-300 p-2"
+                />
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                C'est ici que les clients enverront tes paiements pour chaque étape terminée.
+              </p>
             </div>
 
             <div className="border-t border-gray-100 pt-4">
