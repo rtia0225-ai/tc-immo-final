@@ -594,3 +594,12 @@ begin
   return new;
 end;
 $$;
+
+-- ---------------------------------------------------------
+-- 20. CORRECTIF : le client (pas seulement l'artisan) doit pouvoir créer
+-- l'échéancier de paiement à la création du projet.
+-- ---------------------------------------------------------
+create policy "client cree le chronogramme" on project_milestones
+  for insert with check (
+    exists (select 1 from projects p where p.id = project_milestones.project_id and p.client_id = auth.uid())
+  );

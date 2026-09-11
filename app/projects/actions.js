@@ -69,7 +69,13 @@ export async function createProject(formData) {
   });
 
   if (milestoneRows.length > 0) {
-    await supabase.from("project_milestones").insert(milestoneRows);
+    const { error: milestonesError } = await supabase
+      .from("project_milestones")
+      .insert(milestoneRows);
+
+    if (milestonesError) {
+      console.error("Échec de création de l'échéancier :", milestonesError.message);
+    }
   }
 
   // Relie automatiquement la conversation existante à ce projet, si elle existe déjà
