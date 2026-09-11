@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { uploadIdDocument } from "@/lib/idDocumentActions";
 import MilestoneBuilder from "@/components/MilestoneBuilder";
 import { ID_DOCUMENT_TYPES } from "@/lib/constants";
+import FileInputButton from "@/components/FileInputButton";
 
 export default async function NewProjectPage({ searchParams }) {
   const artisanId = searchParams?.artisan;
@@ -67,13 +68,7 @@ export default async function NewProjectPage({ searchParams }) {
             placeholder="Numéro de la pièce"
             className="w-full rounded-lg border border-gray-300 p-2 text-sm"
           />
-          <input
-            type="file"
-            name="idDocument"
-            accept="image/*,.pdf"
-            required
-            className="w-full rounded-lg border border-gray-300 p-2 text-sm"
-          />
+          <FileInputButton name="idDocument" accept="image/*,.pdf" required label="Choisir un fichier" />
           <p className="text-xs text-gray-500">
             Carte nationale d'identité, passeport ou équivalent. Jamais visible par l'artisan.
           </p>

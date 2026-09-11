@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { logout } from "../auth/actions";
+import { translateStatus } from "@/lib/statusLabels";
 import ProjectTimeline from "@/components/ProjectTimeline";
 
 const CLIENT_TABS = [
@@ -204,7 +205,7 @@ export default async function DashboardPage({ searchParams }) {
                 {projects.map((p) => (
                   <Link key={p.id} href={`/projects/${p.id}`} className="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-3 text-sm hover:shadow-sm">
                     <span>{p.title}</span>
-                    <span className="text-gray-500">{p.status}</span>
+                    <span className="text-gray-500">{translateStatus(p.status)}</span>
                   </Link>
                 ))}
               </div>
@@ -272,7 +273,7 @@ export default async function DashboardPage({ searchParams }) {
                       {projects.map((p) => (
                         <Link key={p.id} href={`/projects/${p.id}`} className="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-3 text-sm hover:shadow-sm">
                           <span>{p.title}</span>
-                          <span className="text-gray-500">{p.status}</span>
+                          <span className="text-gray-500">{translateStatus(p.status)}</span>
                         </Link>
                       ))}
                     </div>
@@ -289,7 +290,7 @@ export default async function DashboardPage({ searchParams }) {
                   projects.map((p) => (
                     <div key={p.id} className="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-3 text-sm">
                       <span>{p.title}</span>
-                      <span className="font-medium">{p.amount} {p.currency} — {p.status}</span>
+                      <span className="font-medium">{p.amount} {p.currency} — {translateStatus(p.status)}</span>
                     </div>
                   ))
                 )}

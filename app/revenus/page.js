@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { translateStatus } from "@/lib/statusLabels";
 
 export default async function RevenusPage() {
   const supabase = createClient();
@@ -68,7 +69,7 @@ export default async function RevenusPage() {
             >
               <span>{p.title}</span>
               <span className="text-sm text-gray-500">
-                {p.amount} {p.currency} — {p.status}
+                {p.amount} {p.currency} — {translateStatus(p.status)}
               </span>
             </div>
           ))}

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { deleteAccount } from "../actions";
+import { translateStatus } from "@/lib/statusLabels";
 
 export default async function DeleteAccountPage({ searchParams }) {
   const supabase = createClient();
@@ -37,7 +38,7 @@ export default async function DeleteAccountPage({ searchParams }) {
           <ul className="mt-3 flex flex-col gap-2">
             {activeProjects.map((p) => (
               <li key={p.id} className="rounded-lg border border-gray-200 bg-white p-3 text-sm">
-                {p.title} — <span className="text-gray-500">{p.status}</span>
+                {p.title} — <span className="text-gray-500">{translateStatus(p.status)}</span>
               </li>
             ))}
           </ul>

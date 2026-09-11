@@ -4,6 +4,7 @@ import { updateArtisanProfile, addArtisanPhoto, deleteArtisanPhoto, uploadAvatar
 import { uploadIdDocument } from "@/lib/idDocumentActions";
 import { CI_CITIES, CONSTRUCTION_SERVICES, ID_DOCUMENT_TYPES, MOBILE_MONEY_OPERATORS } from "@/lib/constants";
 import ShareLocationButton from "@/components/ShareLocationButton";
+import FileInputButton from "@/components/FileInputButton";
 
 export default async function ArtisanProfileEditPage({ searchParams }) {
   const supabase = createClient();
@@ -79,16 +80,10 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
             </div>
           )}
           <form action={uploadAvatar} className="flex items-center gap-2">
-            <input
-              type="file"
-              name="avatar"
-              accept="image/*"
-              required
-              className="text-sm"
-            />
+            <FileInputButton name="avatar" accept="image/*" required label="Choisir une photo" />
             <button
               type="submit"
-              className="rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white hover:bg-forest-dark"
+              className="shrink-0 rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white hover:bg-forest-dark"
             >
               Envoyer
             </button>
@@ -130,16 +125,10 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
             className="rounded-lg border border-gray-300 p-2 text-sm"
           />
           <div className="flex items-center gap-2">
-            <input
-              type="file"
-              name="idDocument"
-              accept="image/*,.pdf"
-              required
-              className="flex-1 text-sm"
-            />
+            <FileInputButton name="idDocument" accept="image/*,.pdf" required label="Choisir un fichier" />
             <button
               type="submit"
-              className="rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white hover:bg-forest-dark"
+              className="shrink-0 rounded-lg bg-forest px-3 py-2 text-xs font-semibold text-white hover:bg-forest-dark"
             >
               Envoyer
             </button>
@@ -397,20 +386,13 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
         ) : (
           <>
             <form action={addArtisanPhoto} className="mt-4 flex flex-col gap-2 sm:flex-row">
-              <input
-                type="file"
-                name="photo"
-                accept="image/*"
-                multiple
-                required
-                className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
-              />
+              <FileInputButton name="photo" accept="image/*" multiple required label="Choisir des photos" className="flex-1" />
               <input
                 name="caption"
                 placeholder="Légende (optionnel, appliquée à toutes)"
                 className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
               />
-              <button type="submit" className="rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-white hover:bg-forest-dark">
+              <button type="submit" className="shrink-0 rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-white hover:bg-forest-dark">
                 Ajouter
               </button>
             </form>
