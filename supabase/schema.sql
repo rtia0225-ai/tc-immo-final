@@ -718,3 +718,32 @@ begin
   return new;
 end;
 $$;
+
+-- ---------------------------------------------------------
+-- 24. PARTICIPANTS SUPPLÉMENTAIRES AU PROJET
+-- Le client peut ajouter d'autres artisans (n'importe quel métier) à un
+-- projet déjà démarré, en plus de l'artisan principal.
+-- ---------------------------------------------------------
+create table project_participants (
+  id uuid primary key default uuid_generate_v4(),
+  project_id uuid references projects(id) on delete cascade,
+  artisan_id uuid references artisan_profiles(id) on delete cascade,
+  added_at timestamptz default now(),
+  unique (project_id, artisan_id)
+);
+
+alter table project_participants enable row level security;
+
+create policy "acces participants projet" on project_participants
+  for select using (
+    exists (select 1 from projects p where p.id = project_participants.project_id and (p.client_id = auth.uid() or p.artisan_id = auth.uid()))
+    or artisan_id = auth.uid()
+  );
+create policy "client ajoute un participant" on project_participants
+  for insert with check (
+    exists (select 1 from projects p where p.id = project_participants.project_id and p.client_id = auth.uid())
+  );
+create policy "client retire un participant" on project_participants
+  for delete using (
+    exists (select 1 from projects p where p.id = project_participants.project_id and p.client_id = auth.uid())
+  );

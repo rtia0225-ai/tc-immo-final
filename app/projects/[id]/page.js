@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import EscrowStatus from "@/components/EscrowStatus";
 import ProjectTimeline from "@/components/ProjectTimeline";
-import { advanceProjectStatus } from "../actions";
+import { advanceProjectStatus, removeParticipant } from "../actions";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -31,11 +31,16 @@ export default async function ProjectPage({ params }) {
 
   const { data: project } = await supabase
     .from("projects")
-    .select("*")
+    .select("*, artisan:artisan_id ( trade, profiles ( full_name, avatar_url ) )")
     .eq("id", id)
     .single();
 
   if (!project) return <p>Projet introuvable.</p>;
+
+  const { data: participants } = await supabase
+    .from("project_participants")
+    .select("id, artisan_id, artisan:artisan_id ( trade, profiles ( full_name, avatar_url ) )")
+    .eq("project_id", id);
 
   const { data: milestones } = await supabase
     .from("project_milestones")
@@ -73,6 +78,67 @@ export default async function ProjectPage({ params }) {
           Contrat en attente de signature — clique pour le consulter et signer
         </Link>
       )}
+
+      {/* Participants au projet */}
+      <div className="mb-6 rounded-lg border border-brand-light bg-white p-5">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold">Participants</h2>
+          {!isArtisan && (
+            <Link
+              href={`/projects/${project.id}/add-participant`}
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white hover:bg-brand-dark"
+              aria-label="Ajouter un participant"
+            >
+              +
+            </Link>
+          )}
+        </div>
+
+        <div className="mt-3 flex flex-col gap-2">
+          <div className="flex items-center gap-3">
+            {project.artisan?.profiles?.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={project.artisan.profiles.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" />
+            ) : (
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-50 text-xs font-bold text-gray-300">
+                {project.artisan?.profiles?.full_name?.slice(0, 2).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <p className="text-sm font-medium">{project.artisan?.profiles?.full_name}</p>
+              <p className="text-xs text-gray-500">{project.artisan?.trade} · Principal</p>
+            </div>
+          </div>
+
+          {participants?.map((p) => (
+            <div key={p.id} className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {p.artisan?.profiles?.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={p.artisan.profiles.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-50 text-xs font-bold text-gray-300">
+                    {p.artisan?.profiles?.full_name?.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm font-medium">{p.artisan?.profiles?.full_name}</p>
+                  <p className="text-xs text-gray-500">{p.artisan?.trade}</p>
+                </div>
+              </div>
+              {!isArtisan && (
+                <form action={removeParticipant}>
+                  <input type="hidden" name="projectId" value={project.id} />
+                  <input type="hidden" name="participantId" value={p.id} />
+                  <button type="submit" className="text-xs text-gray-400 hover:text-red-600">
+                    Retirer
+                  </button>
+                </form>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Paiements (escrow) */}
       <div className="mb-6 rounded-lg border border-brand-light bg-white p-5">

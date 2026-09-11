@@ -181,3 +181,59 @@ export async function advanceProjectStatus(formData) {
 
   redirect(`/projects/${projectId}`);
 }
+
+// Le client ajoute un autre artisan (n'importe quel métier) à un projet
+// déjà démarré — ex: un électricien ajouté en cours de chantier.
+export async function addParticipant(formData) {
+  const supabase = createClient();
+  const projectId = formData.get("projectId");
+  const artisanId = formData.get("artisanId");
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/auth/login");
+
+  const { data: project } = await supabase
+    .from("projects")
+    .select("client_id")
+    .eq("id", projectId)
+    .single();
+
+  if (project?.client_id !== user.id) {
+    redirect(`/projects/${projectId}`);
+  }
+
+  await supabase.from("project_participants").insert({
+    project_id: projectId,
+    artisan_id: artisanId,
+  });
+
+  redirect(`/projects/${projectId}`);
+}
+
+// Le client retire un participant ajouté (pas l'artisan principal)
+export async function removeParticipant(formData) {
+  const supabase = createClient();
+  const projectId = formData.get("projectId");
+  const participantId = formData.get("participantId");
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/auth/login");
+
+  const { data: project } = await supabase
+    .from("projects")
+    .select("client_id")
+    .eq("id", projectId)
+    .single();
+
+  if (project?.client_id !== user.id) {
+    redirect(`/projects/${projectId}`);
+  }
+
+  await supabase.from("project_participants").delete().eq("id", participantId);
+
+  redirect(`/projects/${projectId}`);
+}
