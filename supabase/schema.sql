@@ -787,3 +787,15 @@ create policy "signer le contrat" on contracts
     artisan_id = auth.uid()
     or exists (select 1 from projects p where p.id = contracts.project_id and p.client_id = auth.uid())
   );
+
+-- ---------------------------------------------------------
+-- 27. CORRECTIF URGENT : les règles de sécurité "admin" ajoutées en
+-- section 26 provoquaient une récursion infinie (une règle sur la table
+-- "profiles" qui interroge elle-même "profiles") — cela cassait la
+-- lecture publique des artisans sur tout le site. Règles supprimées.
+-- ---------------------------------------------------------
+drop policy if exists "admin voit tous les profils" on profiles;
+drop policy if exists "admin voit tous les profils artisans" on artisan_profiles;
+drop policy if exists "admin verifie les artisans" on artisan_profiles;
+drop policy if exists "admin voit toutes les pieces d'identite" on storage.objects;
+drop policy if exists "admin gere les remarques" on artisan_admin_notes;
