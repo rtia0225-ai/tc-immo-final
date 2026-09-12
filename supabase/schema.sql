@@ -789,13 +789,35 @@ create policy "signer le contrat" on contracts
   );
 
 -- ---------------------------------------------------------
--- 27. CORRECTIF URGENT : les règles de sécurité "admin" ajoutées en
--- section 26 provoquaient une récursion infinie (une règle sur la table
--- "profiles" qui interroge elle-même "profiles") — cela cassait la
--- lecture publique des artisans sur tout le site. Règles supprimées.
 -- ---------------------------------------------------------
-drop policy if exists "admin voit tous les profils" on profiles;
-drop policy if exists "admin voit tous les profils artisans" on artisan_profiles;
-drop policy if exists "admin verifie les artisans" on artisan_profiles;
-drop policy if exists "admin voit toutes les pieces d'identite" on storage.objects;
-drop policy if exists "admin gere les remarques" on artisan_admin_notes;
+-- 26. COMPTE ADMINISTRATEUR
+-- Voir tous les artisans, leurs pièces d'identité, ajouter des remarques
+-- de vérification sans modifier directement leur profil.
+-- NOTE : "profils visibles publiquement" et "artisans visibles
+-- publiquement" (déjà en place) couvrent déjà la lecture pour l'admin —
+-- inutile (et dangereux, risque de récursion RLS) d'ajouter une règle
+-- supplémentaire sur ces deux tables spécifiquement.
+-- ---------------------------------------------------------
+alter table profiles add column if not exists is_admin boolean default false;
+
+create table artisan_admin_notes (
+  id uuid primary key default uuid_generate_v4(),
+  artisan_id uuid references artisan_profiles(id) on delete cascade,
+  note text not null,
+  created_at timestamptz default now(),
+  created_by uuid references profiles(id)
+);
+
+alter table artisan_admin_notes enable row level security;
+
+create policy "admin gere les remarques" on artisan_admin_notes
+  for all using (exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin = true));
+
+create policy "admin voit toutes les pieces d'identite" on storage.objects
+  for select using (
+    bucket_id = 'id-documents' and
+    exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin = true)
+  );
+
+create policy "admin verifie les artisans" on artisan_profiles
+  for update using (exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin = true));
