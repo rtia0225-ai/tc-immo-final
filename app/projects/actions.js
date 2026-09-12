@@ -2,6 +2,23 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { SINGLE_INSTALLMENT_TRADES, MIN_INSTALLMENTS_OTHER_TRADES } from "@/lib/constants";
+
+// Vérifie que l'échéancier respecte la règle du métier : une seule
+// échéance (100%) pour Architecte/Topographe, au moins 5 pour tous les
+// autres métiers (maçonnerie en tête). Retourne un message d'erreur en
+// français si la règle n'est pas respectée, sinon null.
+function validateInstallmentRule(trade, milestoneTitles) {
+  const requiredDoc = SINGLE_INSTALLMENT_TRADES[trade];
+  if (requiredDoc) {
+    if (milestoneTitles.length !== 1) {
+      return `Pour ce métier, l'échéancier doit contenir une seule étape, payée à la livraison du ${requiredDoc}.`;
+    }
+  } else if (milestoneTitles.length < MIN_INSTALLMENTS_OTHER_TRADES) {
+    return `Pour ce métier, l'échéancier doit contenir au moins ${MIN_INSTALLMENTS_OTHER_TRADES} étapes — le paiement ne peut pas se faire en une seule fois.`;
+  }
+  return null;
+}
 
 // Génère le texte d'un contrat de prestation pour UN artisan précis
 // (principal ou participant), avec son propre échéancier de paiement.
@@ -56,6 +73,17 @@ export async function createProject(formData) {
 
   const milestoneTitles = formData.getAll("milestoneTitle");
   const milestonePercentages = formData.getAll("milestonePercentage");
+
+  const { data: artisanForRule } = await supabase
+    .from("artisan_profiles")
+    .select("trade")
+    .eq("id", artisanId)
+    .single();
+
+  const ruleError = validateInstallmentRule(artisanForRule?.trade, milestoneTitles);
+  if (ruleError) {
+    redirect(`/projects/new?artisan=${artisanId}&error=${encodeURIComponent(ruleError)}`);
+  }
 
   const { data: project, error } = await supabase
     .from("projects")
@@ -220,6 +248,17 @@ export async function addParticipant(formData) {
   const currency = project.currency || "XOF";
   const milestoneTitles = formData.getAll("milestoneTitle");
   const milestonePercentages = formData.getAll("milestonePercentage");
+
+  const { data: artisanForRule } = await supabase
+    .from("artisan_profiles")
+    .select("trade")
+    .eq("id", artisanId)
+    .single();
+
+  const ruleError = validateInstallmentRule(artisanForRule?.trade, milestoneTitles);
+  if (ruleError) {
+    redirect(`/projects/${projectId}/add-participant?artisan=${artisanId}&error=${encodeURIComponent(ruleError)}`);
+  }
 
   const { data: participant, error } = await supabase
     .from("project_participants")

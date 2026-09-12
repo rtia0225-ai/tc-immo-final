@@ -77,3 +77,45 @@ export async function releasePayment(formData) {
   redirect(`/projects/${projectId}`);
 }
 
+
+// Pour Architecte/Topographe : l'artisan envoie le document livré
+// (Permis de Construire / ACD) — ça marque l'étape comme terminée
+// automatiquement et débloque le paiement en un seul virement.
+export async function uploadDeliverable(formData) {
+  const supabase = createClient();
+  const milestoneId = formData.get("milestoneId");
+  const projectId = formData.get("projectId");
+  const file = formData.get("document");
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/auth/login");
+
+  if (!file || typeof file === "string" || file.size === 0) {
+    redirect(`/projects/${projectId}?error=Aucun+fichier+sélectionné`);
+  }
+
+  const ext = file.name.split(".").pop() || "pdf";
+  const path = `${projectId}/${user.id}/livrable.${ext}`;
+  const arrayBuffer = await file.arrayBuffer();
+
+  const { error: uploadError } = await supabase.storage
+    .from("project-deliverables")
+    .upload(path, arrayBuffer, { contentType: file.type, upsert: true });
+
+  if (uploadError) {
+    redirect(`/projects/${projectId}?error=${encodeURIComponent(uploadError.message)}`);
+  }
+
+  await supabase
+    .from("project_milestones")
+    .update({
+      is_completed: true,
+      completed_at: new Date().toISOString(),
+      deliverable_document_url: path,
+    })
+    .eq("id", milestoneId);
+
+  redirect(`/projects/${projectId}`);
+}

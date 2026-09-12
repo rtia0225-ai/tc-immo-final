@@ -1,27 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { SINGLE_INSTALLMENT_TRADES, MIN_INSTALLMENTS_OTHER_TRADES } from "@/lib/constants";
 
-export default function MilestoneBuilder() {
-  const [rows, setRows] = useState([
-    { title: "", percentage: "" },
-    { title: "", percentage: "" },
-  ]);
+export default function MilestoneBuilder({ trade }) {
+  const singleInstallmentDoc = SINGLE_INSTALLMENT_TRADES[trade]; // ex: "Permis de Construire" ou "ACD"
+  const isSingleInstallment = !!singleInstallmentDoc;
+
+  const [rows, setRows] = useState(
+    isSingleInstallment
+      ? [{ title: `Livraison du ${singleInstallmentDoc}`, percentage: "100" }]
+      : [
+          { title: "", percentage: "" },
+          { title: "", percentage: "" },
+          { title: "", percentage: "" },
+          { title: "", percentage: "" },
+          { title: "", percentage: "" },
+        ]
+  );
+
+  // Si le métier change après coup (rare, mais par sécurité)
+  useEffect(() => {
+    if (isSingleInstallment) {
+      setRows([{ title: `Livraison du ${singleInstallmentDoc}`, percentage: "100" }]);
+    }
+  }, [trade]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateRow = (i, field, value) => {
     setRows((r) => r.map((row, idx) => (idx === i ? { ...row, [field]: value } : row)));
   };
 
   const addRow = () => setRows((r) => [...r, { title: "", percentage: "" }]);
-  const removeRow = (i) => setRows((r) => r.filter((_, idx) => idx !== i));
+  const removeRow = (i) => {
+    if (!isSingleInstallment && rows.length > MIN_INSTALLMENTS_OTHER_TRADES) {
+      setRows((r) => r.filter((_, idx) => idx !== i));
+    }
+  };
 
   const total = rows.reduce((sum, r) => sum + (parseFloat(r.percentage) || 0), 0);
 
   return (
     <div>
       <label className="mb-2 block text-sm font-medium">
-        Échéancier de paiement (selon ce que vous avez convenu avec l'artisan)
+        Échéancier de paiement
       </label>
+
+      {isSingleInstallment ? (
+        <p className="mb-3 rounded-lg bg-brand-light p-3 text-xs text-brand-dark">
+          Pour ce métier, le paiement se fait en <strong>une seule fois</strong>, uniquement à la livraison du {singleInstallmentDoc} sur la plateforme — l'artisan doit envoyer le document pour débloquer le virement.
+        </p>
+      ) : (
+        <p className="mb-3 rounded-lg bg-brand-light p-3 text-xs text-brand-dark">
+          Pour ce métier, tu dois prévoir <strong>au moins {MIN_INSTALLMENTS_OTHER_TRADES} étapes</strong> — le paiement ne peut jamais se faire en une seule fois. Discute de ce découpage avec l'artisan avant de valider.
+        </p>
+      )}
 
       <div className="flex flex-col gap-2">
         {rows.map((row, i) => (
@@ -31,8 +63,9 @@ export default function MilestoneBuilder() {
               value={row.title}
               onChange={(e) => updateRow(i, "title", e.target.value)}
               required
+              readOnly={isSingleInstallment}
               placeholder="ex: Fondations terminées"
-              className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
+              className={`flex-1 rounded-lg border border-gray-300 p-2 text-sm ${isSingleInstallment ? "bg-gray-50" : ""}`}
             />
             <input
               name="milestonePercentage"
@@ -43,10 +76,11 @@ export default function MilestoneBuilder() {
               value={row.percentage}
               onChange={(e) => updateRow(i, "percentage", e.target.value)}
               required
+              readOnly={isSingleInstallment}
               placeholder="%"
-              className="w-20 rounded-lg border border-gray-300 p-2 text-sm"
+              className={`w-20 rounded-lg border border-gray-300 p-2 text-sm ${isSingleInstallment ? "bg-gray-50" : ""}`}
             />
-            {rows.length > 1 && (
+            {!isSingleInstallment && rows.length > MIN_INSTALLMENTS_OTHER_TRADES && (
               <button
                 type="button"
                 onClick={() => removeRow(i)}
@@ -60,16 +94,21 @@ export default function MilestoneBuilder() {
         ))}
       </div>
 
-      <button
-        type="button"
-        onClick={addRow}
-        className="mt-2 text-sm font-medium text-forest hover:underline"
-      >
-        + Ajouter une étape
-      </button>
+      {!isSingleInstallment && (
+        <button
+          type="button"
+          onClick={addRow}
+          className="mt-2 text-sm font-medium text-forest hover:underline"
+        >
+          + Ajouter une étape
+        </button>
+      )}
 
       <p className={`mt-2 text-xs ${total === 100 ? "text-forest" : "text-brand"}`}>
         Total : {total}% {total !== 100 && "— doit être égal à 100% pour valider"}
+        {!isSingleInstallment && rows.length < MIN_INSTALLMENTS_OTHER_TRADES && (
+          <span className="ml-2">— minimum {MIN_INSTALLMENTS_OTHER_TRADES} étapes requises</span>
+        )}
       </p>
     </div>
   );

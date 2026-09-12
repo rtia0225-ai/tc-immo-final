@@ -1,15 +1,21 @@
-import { toggleMilestone, releasePayment } from "@/app/projects/milestones-actions";
+import { toggleMilestone, releasePayment, uploadDeliverable } from "@/app/projects/milestones-actions";
+import FileInputButton from "@/components/FileInputButton";
+import { SINGLE_INSTALLMENT_TRADES } from "@/lib/constants";
 
 // Chronologie "ligne + points" : chaque étape porte un montant lié au
 // contrat. L'artisan coche l'étape une fois le travail fait (date
 // horodatée), puis le client confirme le virement correspondant (date
-// horodatée séparément).
+// horodatée séparément). Pour Architecte/Topographe, l'étape se termine
+// automatiquement par l'envoi du document livré (Permis/ACD).
 export default function ProjectTimeline({
   projectId,
   milestones,
   isArtisan,
   currency,
+  trade,
 }) {
+  const requiresDeliverable = !!SINGLE_INSTALLMENT_TRADES[trade];
+
   return (
     <div className="rounded-lg border border-brand-light bg-white p-5">
       <h2 className="mb-4 font-semibold">Échéancier de paiement</h2>
@@ -48,24 +54,47 @@ export default function ProjectTimeline({
                 )}
               </div>
 
-              {/* Case à cocher côté artisan */}
+              {/* Côté artisan : case à cocher normale, ou envoi du document
+                  livré pour Architecte/Topographe */}
               {isArtisan && !m.is_completed && (
-                <form action={toggleMilestone} className="mt-2">
-                  <input type="hidden" name="milestoneId" value={m.id} />
-                  <input type="hidden" name="projectId" value={projectId} />
-                  <input type="hidden" name="isCompleted" value="false" />
-                  <button
-                    type="submit"
-                    className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark"
-                  >
-                    Marquer comme terminé
-                  </button>
-                </form>
+                requiresDeliverable ? (
+                  <form action={uploadDeliverable} className="mt-2 flex flex-col gap-2">
+                    <input type="hidden" name="milestoneId" value={m.id} />
+                    <input type="hidden" name="projectId" value={projectId} />
+                    <FileInputButton name="document" accept=".pdf,image/*" required label="Choisir le document" />
+                    <button
+                      type="submit"
+                      className="w-fit rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark"
+                    >
+                      Envoyer et débloquer le paiement
+                    </button>
+                  </form>
+                ) : (
+                  <form action={toggleMilestone} className="mt-2">
+                    <input type="hidden" name="milestoneId" value={m.id} />
+                    <input type="hidden" name="projectId" value={projectId} />
+                    <input type="hidden" name="isCompleted" value="false" />
+                    <button
+                      type="submit"
+                      className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark"
+                    >
+                      Marquer comme terminé
+                    </button>
+                  </form>
+                )
               )}
 
               {m.is_completed && (
                 <p className="mt-1 text-xs text-gray-400">
                   Terminé par l'artisan le {new Date(m.completed_at).toLocaleDateString("fr-FR")}
+                  {m.deliverableSignedUrl && (
+                    <>
+                      {" "}—{" "}
+                      <a href={m.deliverableSignedUrl} target="_blank" rel="noreferrer" className="text-brand hover:underline">
+                        voir le document
+                      </a>
+                    </>
+                  )}
                 </p>
               )}
 

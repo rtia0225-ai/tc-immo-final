@@ -826,3 +826,26 @@ create policy "admin verifie les artisans" on artisan_profiles
 -- 28. SUSPENSION D'UN ARTISAN PAR L'ADMIN
 -- ---------------------------------------------------------
 alter table artisan_profiles add column if not exists is_suspended boolean default false;
+
+-- ---------------------------------------------------------
+-- 29. LIVRABLES ARCHITECTE/TOPOGRAPHE (paiement en un seul virement,
+-- déclenché par l'envoi du document) + règle des 5 échéances minimum
+-- pour les autres métiers (imposée côté application, pas en base).
+-- ---------------------------------------------------------
+alter table project_milestones add column if not exists deliverable_document_url text;
+
+insert into storage.buckets (id, name, public)
+values ('project-deliverables', 'project-deliverables', false)
+on conflict (id) do nothing;
+
+create policy "participants du projet voient les livrables" on storage.objects
+  for select using (
+    bucket_id = 'project-deliverables' and
+    exists (select 1 from projects p where p.id::text = (storage.foldername(name))[1] and (p.client_id = auth.uid() or p.artisan_id = auth.uid()))
+    or exists (select 1 from project_participants pp where pp.project_id::text = (storage.foldername(name))[1] and pp.artisan_id = auth.uid())
+  );
+
+create policy "artisan envoie son livrable" on storage.objects
+  for insert with check (
+    bucket_id = 'project-deliverables' and (storage.foldername(name))[2] = auth.uid()::text
+  );

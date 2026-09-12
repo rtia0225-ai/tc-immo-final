@@ -74,7 +74,7 @@ export default async function AddParticipantPage({ params, searchParams }) {
           </div>
 
           <div className="border-t border-gray-100 pt-4">
-            <MilestoneBuilder />
+            <MilestoneBuilder trade={artisan?.trade} />
           </div>
 
           <button

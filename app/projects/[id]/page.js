@@ -69,6 +69,18 @@ export default async function ProjectPage({ params }) {
     .in("artisan_id", artisanIds)
     .order("order_index", { ascending: true });
 
+  // Liens signés temporaires pour les documents livrés (Permis/ACD),
+  // le bucket est privé.
+  const milestonesWithDeliverables = await Promise.all(
+    (allMilestones || []).map(async (m) => {
+      if (!m.deliverable_document_url) return m;
+      const { data } = await supabase.storage
+        .from("project-deliverables")
+        .createSignedUrl(m.deliverable_document_url, 3600);
+      return { ...m, deliverableSignedUrl: data?.signedUrl || null };
+    })
+  );
+
   const { data: allContracts } = await supabase
     .from("contracts")
     .select("artisan_id, client_signed_at, artisan_signed_at")
@@ -187,7 +199,7 @@ export default async function ProjectPage({ params }) {
         {artisansOnProject.map((a) => {
           const contract = allContracts?.find((c) => c.artisan_id === a.artisanId);
           const contractSigned = !!contract?.client_signed_at && !!contract?.artisan_signed_at;
-          const artisanMilestones = (allMilestones || []).filter((m) => m.artisan_id === a.artisanId);
+          const artisanMilestones = milestonesWithDeliverables.filter((m) => m.artisan_id === a.artisanId);
 
           return (
             <div key={a.artisanId} className="rounded-lg border border-gray-200 bg-white p-5">
@@ -215,6 +227,7 @@ export default async function ProjectPage({ params }) {
                   milestones={artisanMilestones}
                   isArtisan={isArtisan && user.id === a.artisanId}
                   currency={a.currency}
+                  trade={a.trade}
                 />
               </div>
             </div>

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import ReviewList from "@/components/ReviewList";
 import PhotoCarousel from "@/components/PhotoCarousel";
 import Link from "next/link";
+import { SINGLE_INSTALLMENT_TRADES, MIN_INSTALLMENTS_OTHER_TRADES } from "@/lib/constants";
 
 export default async function ArtisanProfilePage({ params }) {
   const supabase = createClient();
@@ -113,6 +114,19 @@ export default async function ArtisanProfilePage({ params }) {
               : artisan.mobility_cities?.join(", ") || "Non précisé"}
           </p>
         </div>
+      </div>
+
+      {/* Règle de paiement à connaître avant toute négociation */}
+      <div className="mt-4 rounded-lg bg-brand-light p-4 text-sm text-brand-dark">
+        {SINGLE_INSTALLMENT_TRADES[artisan.trade] ? (
+          <p>
+            <strong>À savoir avant de négocier :</strong> pour ce métier, le paiement se fait en une seule fois, uniquement à la livraison du {SINGLE_INSTALLMENT_TRADES[artisan.trade]} sur la plateforme.
+          </p>
+        ) : (
+          <p>
+            <strong>À savoir avant de négocier :</strong> ne paie jamais la totalité en une seule fois. La plateforme impose un échéancier d'au moins {MIN_INSTALLMENTS_OTHER_TRADES} étapes pour ce métier — prévois ce découpage dans ta discussion avec l'artisan.
+          </p>
+        )}
       </div>
 
       <div className="mt-4 rounded-lg border border-gray-200 bg-white p-6">
