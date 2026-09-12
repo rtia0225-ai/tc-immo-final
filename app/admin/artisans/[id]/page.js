@@ -41,6 +41,12 @@ export default async function AdminArtisanDetailPage({ params }) {
     .eq("artisan_id", id)
     .order("created_at", { ascending: false });
 
+  const { data: photos } = await supabase
+    .from("artisan_photos")
+    .select("*")
+    .eq("artisan_id", id)
+    .order("created_at", { ascending: true });
+
   const p = artisan.profiles;
 
   return (
@@ -88,6 +94,25 @@ export default async function AdminArtisanDetailPage({ params }) {
           <div><dt className="text-gray-400">Mobile Money</dt><dd>{artisan.mobile_money_operator} {artisan.mobile_money_number || "—"}</dd></div>
           <div><dt className="text-gray-400">Inscrit le</dt><dd>{p?.created_at ? new Date(p.created_at).toLocaleDateString("fr-FR") : "—"}</dd></div>
         </dl>
+
+        <div className="mt-4 border-t border-gray-100 pt-4">
+          <dt className="text-xs text-gray-400">Position GPS (adresse fixe)</dt>
+          {p?.home_latitude && p?.home_longitude ? (
+            <dd className="mt-1 text-sm">
+              Capturée le {p.home_location_captured_at ? new Date(p.home_location_captured_at).toLocaleDateString("fr-FR") : "—"} —{" "}
+              <a
+                href={`https://www.google.com/maps?q=${p.home_latitude},${p.home_longitude}`}
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium text-brand hover:underline"
+              >
+                voir sur la carte
+              </a>
+            </dd>
+          ) : (
+            <dd className="mt-1 text-sm text-red-600">Non renseignée</dd>
+          )}
+        </div>
       </div>
 
       {/* Pièce d'identité */}
@@ -122,6 +147,25 @@ export default async function AdminArtisanDetailPage({ params }) {
           <div><dt className="text-gray-400">Services</dt><dd>{(artisan.services || []).join(", ") || "—"}</dd></div>
           <div><dt className="text-gray-400">Mobilité</dt><dd>{artisan.mobility_scope === "all" ? "Toute la CI" : (artisan.mobility_cities || []).join(", ")}</dd></div>
         </dl>
+      </div>
+
+      {/* Photos de réalisations */}
+      <div className="mt-4 rounded-lg border border-gray-200 bg-white p-5">
+        <p className="text-xs font-bold uppercase tracking-wide text-gray-400">
+          Photos de réalisations ({photos?.length || 0})
+        </p>
+        {photos?.length === 0 || !photos ? (
+          <p className="mt-2 text-sm text-gray-500">Aucune photo envoyée.</p>
+        ) : (
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {photos.map((ph) => (
+              <a key={ph.id} href={ph.photo_url} target="_blank" rel="noreferrer">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={ph.photo_url} alt={ph.caption || ""} className="h-24 w-full rounded-lg object-cover" />
+              </a>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Remarques admin */}
