@@ -49,3 +49,21 @@ export async function toggleVerified(formData) {
 
   redirect(`/admin/artisans/${artisanId}`);
 }
+
+// Suspendre un artisan le retire de la recherche publique — il reste
+// inscrit, ses données restent visibles côté admin, mais les clients ne
+// peuvent plus le trouver ni le contacter tant qu'il est suspendu.
+export async function toggleSuspended(formData) {
+  const supabase = createClient();
+  await requireAdmin(supabase);
+
+  const artisanId = formData.get("artisanId");
+  const isSuspended = formData.get("isSuspended") === "true";
+
+  await supabase
+    .from("artisan_profiles")
+    .update({ is_suspended: !isSuspended })
+    .eq("id", artisanId);
+
+  redirect(`/admin/artisans/${artisanId}`);
+}

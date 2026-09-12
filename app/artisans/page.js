@@ -27,6 +27,7 @@ export default async function ArtisansPage({ searchParams }) {
        services, projects_completed, mobility_scope, mobility_cities,
        profiles ( full_name, city, avatar_url )`
     )
+    .eq("is_suspended", false)
     .order("is_verified", { ascending: false });
 
   let artisans = (allArtisans || []).filter((a) => {

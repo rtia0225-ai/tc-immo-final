@@ -821,3 +821,8 @@ create policy "admin voit toutes les pieces d'identite" on storage.objects
 
 create policy "admin verifie les artisans" on artisan_profiles
   for update using (exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin = true));
+
+-- ---------------------------------------------------------
+-- 28. SUSPENSION D'UN ARTISAN PAR L'ADMIN
+-- ---------------------------------------------------------
+alter table artisan_profiles add column if not exists is_suspended boolean default false;

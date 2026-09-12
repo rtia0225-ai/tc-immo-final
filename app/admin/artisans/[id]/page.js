@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { addAdminNote, toggleVerified } from "../../actions";
+import { addAdminNote, toggleVerified, toggleSuspended } from "../../actions";
 import Link from "next/link";
 
 export default async function AdminArtisanDetailPage({ params }) {
@@ -70,18 +70,39 @@ export default async function AdminArtisanDetailPage({ params }) {
         </div>
       </div>
 
-      <form action={toggleVerified} className="mt-4">
-        <input type="hidden" name="artisanId" value={artisan.id} />
-        <input type="hidden" name="isVerified" value={String(artisan.is_verified)} />
-        <button
-          type="submit"
-          className={`rounded-md px-4 py-2 text-sm font-bold ${
-            artisan.is_verified ? "bg-gray-100 text-gray-600" : "bg-forest text-white"
-          }`}
-        >
-          {artisan.is_verified ? "Retirer la vérification" : "Marquer comme vérifié"}
-        </button>
-      </form>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <form action={toggleVerified}>
+          <input type="hidden" name="artisanId" value={artisan.id} />
+          <input type="hidden" name="isVerified" value={String(artisan.is_verified)} />
+          <button
+            type="submit"
+            className={`rounded-md px-4 py-2 text-sm font-bold ${
+              artisan.is_verified ? "bg-gray-100 text-gray-600" : "bg-forest text-white"
+            }`}
+          >
+            {artisan.is_verified ? "Retirer la vérification" : "Marquer comme vérifié"}
+          </button>
+        </form>
+
+        <form action={toggleSuspended}>
+          <input type="hidden" name="artisanId" value={artisan.id} />
+          <input type="hidden" name="isSuspended" value={String(artisan.is_suspended)} />
+          <button
+            type="submit"
+            className={`rounded-md px-4 py-2 text-sm font-bold ${
+              artisan.is_suspended ? "bg-forest text-white" : "bg-red-600 text-white"
+            }`}
+          >
+            {artisan.is_suspended ? "Réactiver ce profil" : "Suspendre ce profil"}
+          </button>
+        </form>
+      </div>
+
+      {artisan.is_suspended && (
+        <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+          Ce profil est suspendu — il n'apparaît plus dans la recherche publique.
+        </p>
+      )}
 
       {/* Informations privées */}
       <div className="mt-6 rounded-lg border border-gray-200 bg-white p-5">
@@ -177,7 +198,7 @@ export default async function AdminArtisanDetailPage({ params }) {
             <div key={n.id} className="rounded-lg bg-gray-50 p-3 text-sm">
               <p>{n.note}</p>
               <p className="mt-1 text-xs text-gray-400">
-                {n.created_by_profile?.full_name} — {new Date(n.created_at).toLocaleString("fr-FR")}
+                Admin — {new Date(n.created_at).toLocaleString("fr-FR")}
               </p>
             </div>
           ))}
