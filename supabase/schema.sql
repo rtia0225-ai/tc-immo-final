@@ -787,3 +787,38 @@ create policy "signer le contrat" on contracts
     artisan_id = auth.uid()
     or exists (select 1 from projects p where p.id = contracts.project_id and p.client_id = auth.uid())
   );
+
+-- ---------------------------------------------------------
+-- 26. COMPTE ADMINISTRATEUR
+-- Voir tous les artisans, leurs pièces d'identité, ajouter des remarques
+-- de vérification sans modifier directement leur profil.
+-- ---------------------------------------------------------
+alter table profiles add column if not exists is_admin boolean default false;
+
+create table artisan_admin_notes (
+  id uuid primary key default uuid_generate_v4(),
+  artisan_id uuid references artisan_profiles(id) on delete cascade,
+  note text not null,
+  created_at timestamptz default now(),
+  created_by uuid references profiles(id)
+);
+
+alter table artisan_admin_notes enable row level security;
+
+create policy "admin gere les remarques" on artisan_admin_notes
+  for all using (exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin = true));
+
+create policy "admin voit tous les profils" on profiles
+  for select using (exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin = true));
+
+create policy "admin voit tous les profils artisans" on artisan_profiles
+  for select using (exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin = true));
+
+create policy "admin voit toutes les pieces d'identite" on storage.objects
+  for select using (
+    bucket_id = 'id-documents' and
+    exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin = true)
+  );
+
+create policy "admin verifie les artisans" on artisan_profiles
+  for update using (exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin = true));
