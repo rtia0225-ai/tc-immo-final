@@ -30,25 +30,57 @@ export default async function DashboardPage({ searchParams }) {
 
   const { data: projects } = await supabase
     .from("projects")
-    .select("id, title, status, amount, currency, created_at")
+    .select("id, title, status, amount, currency, created_at, artisan_id")
     .or(`client_id.eq.${user.id},artisan_id.eq.${user.id}`)
     .order("created_at", { ascending: false });
 
-  const activeProject = (projects || []).find(
+  // Un artisan ajouté comme participant (pas artisan principal) doit aussi
+  // voir les projets où il intervient.
+  let participantProjects = [];
+  if (isArtisan) {
+    const { data: myParticipations } = await supabase
+      .from("project_participants")
+      .select("project_id")
+      .eq("artisan_id", user.id);
+
+    const participantProjectIds = (myParticipations || []).map((p) => p.project_id);
+    if (participantProjectIds.length > 0) {
+      const { data } = await supabase
+        .from("projects")
+        .select("id, title, status, amount, currency, created_at, artisan_id")
+        .in("id", participantProjectIds);
+      participantProjects = data || [];
+    }
+  }
+
+  const allProjects = [
+    ...(projects || []),
+    ...participantProjects.filter((p) => !(projects || []).some((existing) => existing.id === p.id)),
+  ];
+
+  const activeProject = allProjects.find(
     (p) => p.status !== "released" && p.status !== "cancelled"
   );
 
   let milestones = [];
   if (activeProject) {
-    const { data } = await supabase
+    let milestonesQuery = supabase
       .from("project_milestones")
       .select("*")
       .eq("project_id", activeProject.id)
       .order("order_index", { ascending: true });
+
+    // Un artisan ne voit ici que SES PROPRES étapes (pas celles des autres
+    // artisans du même projet) ; le client voit celles de l'artisan principal.
+    milestonesQuery = isArtisan
+      ? milestonesQuery.eq("artisan_id", user.id)
+      : milestonesQuery.eq("artisan_id", activeProject.artisan_id);
+
+    const { data } = await milestonesQuery;
     milestones = data || [];
   }
 
-  const projetsEnCours = (projects || []).filter(
+  const projetsEnCours = (allProjects || []).filter(
     (p) => p.status !== "released" && p.status !== "cancelled"
   ).length;
   const etapesValidees = milestones.filter((m) => m.is_completed).length;
@@ -200,9 +232,9 @@ export default async function DashboardPage({ searchParams }) {
               <p className="text-gray-500">Aucun projet en cours pour le moment.</p>
             )}
 
-            {projects && projects.length > 0 && (
+            {allProjects && allProjects.length > 0 && (
               <div className="mt-4 flex flex-col gap-2">
-                {projects.map((p) => (
+                {allProjects.map((p) => (
                   <Link key={p.id} href={`/projects/${p.id}`} className="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-3 text-sm hover:shadow-sm">
                     <span>{p.title}</span>
                     <span className="text-gray-500">{translateStatus(p.status)}</span>

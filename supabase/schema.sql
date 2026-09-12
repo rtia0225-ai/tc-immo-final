@@ -747,3 +747,43 @@ create policy "client retire un participant" on project_participants
   for delete using (
     exists (select 1 from projects p where p.id = project_participants.project_id and p.client_id = auth.uid())
   );
+
+-- ---------------------------------------------------------
+-- 25. CONTRATS ET ÉCHÉANCIERS INDÉPENDANTS PAR ARTISAN
+-- Chaque artisan d'un projet (principal ou ajouté) a son propre
+-- échéancier de paiement et son propre contrat — pas de prix groupé,
+-- chacun fait son devis séparément.
+-- ---------------------------------------------------------
+alter table project_milestones add column if not exists artisan_id uuid references artisan_profiles(id);
+alter table contracts add column if not exists artisan_id uuid references artisan_profiles(id);
+alter table contracts drop constraint if exists contracts_project_id_key;
+alter table contracts add constraint contracts_project_artisan_unique unique (project_id, artisan_id);
+
+alter table project_participants add column if not exists amount numeric(12,2);
+alter table project_participants add column if not exists description text;
+alter table project_participants add column if not exists currency text default 'XOF';
+
+drop policy if exists "artisan gere le chronogramme" on project_milestones;
+create policy "artisan gere ses propres etapes" on project_milestones
+  for all using (artisan_id = auth.uid());
+
+drop policy if exists "acces chronogramme participants" on project_milestones;
+create policy "acces chronogramme participants" on project_milestones
+  for select using (
+    artisan_id = auth.uid()
+    or exists (select 1 from projects p where p.id = project_milestones.project_id and (p.client_id = auth.uid() or p.artisan_id = auth.uid()))
+  );
+
+drop policy if exists "acces contrat participants" on contracts;
+create policy "acces contrat participants" on contracts
+  for select using (
+    artisan_id = auth.uid()
+    or exists (select 1 from projects p where p.id = contracts.project_id and p.client_id = auth.uid())
+  );
+
+drop policy if exists "signer le contrat" on contracts;
+create policy "signer le contrat" on contracts
+  for update using (
+    artisan_id = auth.uid()
+    or exists (select 1 from projects p where p.id = contracts.project_id and p.client_id = auth.uid())
+  );

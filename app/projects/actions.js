@@ -3,12 +3,34 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-// Étape "Sécurisez vos travaux" : le client valide un devis avec l'artisan,
-// ce qui crée le projet. Seul le client peut initier cette action (vérifié
-// aussi au niveau de la page /projects/new).
-// L'échéancier de paiement n'est plus générique : chaque étape saisie par
-// le client (titre + pourcentage) porte son propre montant, calculé sur
-// le montant total du projet.
+// Génère le texte d'un contrat de prestation pour UN artisan précis
+// (principal ou participant), avec son propre échéancier de paiement.
+function buildContractContent({ clientName, artisanName, trade, title, description, amount, currency, milestoneRows }) {
+  const scheduleText = milestoneRows
+    .map((m) => `  - ${m.title} : ${m.payment_percentage}% (${m.amount} ${currency})`)
+    .join("\n");
+
+  return `CONTRAT DE PRESTATION — TC-IMMO
+
+Entre le client ${clientName || ""} et le prestataire ${artisanName || ""} (${trade || ""}).
+
+Objet : ${title}
+Description : ${description || "Non précisée"}
+Montant convenu : ${amount} ${currency}
+
+Échéancier de paiement convenu :
+${scheduleText || "  (aucune étape définie)"}
+
+Le paiement du client est séquestré sur la plateforme TC-Immo. Chaque montant listé ci-dessus n'est libéré au prestataire qu'après validation, par l'artisan, de l'étape correspondante.
+
+Chaque prestataire du projet est indépendant : ce contrat ne concerne que sa propre prestation, à ses propres conditions.
+
+En signant ce contrat, les deux parties reconnaissent avoir convenu de ces termes et acceptent de débuter les travaux dans ce cadre.`;
+}
+
+// Étape "Sécurisez vos travaux" : le client valide un devis avec l'artisan
+// principal, ce qui crée le projet. Seul le client peut initier cette
+// action (vérifié aussi au niveau de la page /projects/new).
 export async function createProject(formData) {
   const supabase = createClient();
 
@@ -55,12 +77,12 @@ export async function createProject(formData) {
     );
   }
 
-  // Crée l'échéancier de paiement tel que défini par le client
   const totalAmount = Number(amount) || 0;
   const milestoneRows = milestoneTitles.map((t, i) => {
     const pct = Number(milestonePercentages[i]) || 0;
     return {
       project_id: project.id,
+      artisan_id: artisanId,
       title: t,
       order_index: i + 1,
       payment_percentage: pct,
@@ -72,13 +94,11 @@ export async function createProject(formData) {
     const { error: milestonesError } = await supabase
       .from("project_milestones")
       .insert(milestoneRows);
-
     if (milestonesError) {
       console.error("Échec de création de l'échéancier :", milestonesError.message);
     }
   }
 
-  // Relie automatiquement la conversation existante à ce projet, si elle existe déjà
   await supabase
     .from("conversations")
     .update({ project_id: project.id })
@@ -86,8 +106,6 @@ export async function createProject(formData) {
     .eq("artisan_id", artisanId)
     .is("project_id", null);
 
-  // Génère le contrat tripartite, à signer par les deux parties avant
-  // le démarrage réel des travaux.
   const { data: clientProfile } = await supabase
     .from("profiles")
     .select("full_name")
@@ -99,31 +117,24 @@ export async function createProject(formData) {
     .eq("id", artisanId)
     .single();
 
-  const scheduleText = milestoneRows
-    .map((m) => `  - ${m.title} : ${m.payment_percentage}% (${m.amount} ${currency})`)
-    .join("\n");
-
-  const contractContent = `CONTRAT DE PRESTATION — TC-IMMO
-
-Entre le client ${clientProfile?.full_name || ""} et le prestataire ${artisanData?.profiles?.full_name || ""} (${artisanData?.trade || ""}).
-
-Objet : ${title}
-Description : ${description || "Non précisée"}
-Montant convenu : ${amount} ${currency}
-
-Échéancier de paiement convenu :
-${scheduleText || "  (aucune étape définie)"}
-
-Le paiement du client est séquestré sur la plateforme TC-Immo. Chaque montant listé ci-dessus n'est libéré au prestataire qu'après validation, par l'artisan, de l'étape correspondante.
-
-En signant ce contrat, les deux parties reconnaissent avoir convenu de ces termes et acceptent de débuter les travaux dans ce cadre.`;
+  const contractContent = buildContractContent({
+    clientName: clientProfile?.full_name,
+    artisanName: artisanData?.profiles?.full_name,
+    trade: artisanData?.trade,
+    title,
+    description,
+    amount,
+    currency,
+    milestoneRows,
+  });
 
   await supabase.from("contracts").insert({
     project_id: project.id,
+    artisan_id: artisanId,
     content: contractContent,
   });
 
-  redirect(`/projects/${project.id}/contract`);
+  redirect(`/projects/${project.id}/contract/${artisanId}`);
 }
 
 // Signature de consentement (horodatée) — pas une signature électronique
@@ -132,6 +143,7 @@ export async function signContract(formData) {
   const supabase = createClient();
   const contractId = formData.get("contractId");
   const projectId = formData.get("projectId");
+  const artisanId = formData.get("artisanId");
 
   const {
     data: { user },
@@ -140,19 +152,17 @@ export async function signContract(formData) {
 
   const { data: project } = await supabase
     .from("projects")
-    .select("client_id, artisan_id")
+    .select("client_id")
     .eq("id", projectId)
     .single();
 
-  if (!project) redirect(`/projects/${projectId}/contract`);
-
   const updates = {};
-  if (project.client_id === user.id) updates.client_signed_at = new Date().toISOString();
-  if (project.artisan_id === user.id) updates.artisan_signed_at = new Date().toISOString();
+  if (project?.client_id === user.id) updates.client_signed_at = new Date().toISOString();
+  if (artisanId === user.id) updates.artisan_signed_at = new Date().toISOString();
 
   await supabase.from("contracts").update(updates).eq("id", contractId);
 
-  redirect(`/projects/${projectId}/contract`);
+  redirect(`/projects/${projectId}/contract/${artisanId}`);
 }
 
 // NOTE : ceci ne fait qu'avancer le statut en base. L'intégration réelle
@@ -183,11 +193,14 @@ export async function advanceProjectStatus(formData) {
 }
 
 // Le client ajoute un autre artisan (n'importe quel métier) à un projet
-// déjà démarré — ex: un électricien ajouté en cours de chantier.
+// déjà démarré, avec sa PROPRE prestation, son PROPRE montant et son
+// PROPRE échéancier — indépendant du reste du projet (pas de prix groupé).
 export async function addParticipant(formData) {
   const supabase = createClient();
   const projectId = formData.get("projectId");
   const artisanId = formData.get("artisanId");
+  const description = formData.get("description");
+  const amount = formData.get("amount");
 
   const {
     data: { user },
@@ -196,7 +209,7 @@ export async function addParticipant(formData) {
 
   const { data: project } = await supabase
     .from("projects")
-    .select("client_id")
+    .select("client_id, title, currency")
     .eq("id", projectId)
     .single();
 
@@ -204,12 +217,72 @@ export async function addParticipant(formData) {
     redirect(`/projects/${projectId}`);
   }
 
-  await supabase.from("project_participants").insert({
-    project_id: projectId,
-    artisan_id: artisanId,
+  const currency = project.currency || "XOF";
+  const milestoneTitles = formData.getAll("milestoneTitle");
+  const milestonePercentages = formData.getAll("milestonePercentage");
+
+  const { data: participant, error } = await supabase
+    .from("project_participants")
+    .insert({
+      project_id: projectId,
+      artisan_id: artisanId,
+      amount,
+      description,
+      currency,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    redirect(`/projects/${projectId}/add-participant?error=${encodeURIComponent(error.message)}`);
+  }
+
+  const totalAmount = Number(amount) || 0;
+  const milestoneRows = milestoneTitles.map((t, i) => {
+    const pct = Number(milestonePercentages[i]) || 0;
+    return {
+      project_id: projectId,
+      artisan_id: artisanId,
+      title: t,
+      order_index: i + 1,
+      payment_percentage: pct,
+      amount: Math.round((totalAmount * pct) / 100),
+    };
   });
 
-  redirect(`/projects/${projectId}`);
+  if (milestoneRows.length > 0) {
+    await supabase.from("project_milestones").insert(milestoneRows);
+  }
+
+  const { data: clientProfile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .single();
+  const { data: artisanData } = await supabase
+    .from("artisan_profiles")
+    .select("trade, profiles ( full_name )")
+    .eq("id", artisanId)
+    .single();
+
+  const contractContent = buildContractContent({
+    clientName: clientProfile?.full_name,
+    artisanName: artisanData?.profiles?.full_name,
+    trade: artisanData?.trade,
+    title: `${project.title} — ${artisanData?.trade || "prestation complémentaire"}`,
+    description,
+    amount,
+    currency,
+    milestoneRows,
+  });
+
+  await supabase.from("contracts").insert({
+    project_id: projectId,
+    artisan_id: artisanId,
+    content: contractContent,
+  });
+
+  redirect(`/projects/${projectId}/contract/${artisanId}`);
 }
 
 // Le client retire un participant ajouté (pas l'artisan principal)
