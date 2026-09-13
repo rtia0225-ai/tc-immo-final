@@ -849,3 +849,8 @@ create policy "artisan envoie son livrable" on storage.objects
   for insert with check (
     bucket_id = 'project-deliverables' and (storage.foldername(name))[2] = auth.uid()::text
   );
+
+-- ---------------------------------------------------------
+-- 30. PHOTOS ET VIDÉOS DE RÉALISATIONS (même compteur de 5)
+-- ---------------------------------------------------------
+alter table artisan_photos add column if not exists media_type text default 'image';

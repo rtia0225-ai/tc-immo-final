@@ -185,6 +185,7 @@ export async function addArtisanPhoto(formData) {
       artisan_id: user.id,
       photo_url: publicUrlData.publicUrl,
       caption: caption?.trim() || null,
+      media_type: file.type?.startsWith("video/") ? "video" : "image",
     });
   }
 

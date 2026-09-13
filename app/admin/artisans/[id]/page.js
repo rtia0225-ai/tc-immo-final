@@ -181,8 +181,12 @@ export default async function AdminArtisanDetailPage({ params }) {
           <div className="mt-3 grid grid-cols-3 gap-2">
             {photos.map((ph) => (
               <a key={ph.id} href={ph.photo_url} target="_blank" rel="noreferrer">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={ph.photo_url} alt={ph.caption || ""} className="h-24 w-full rounded-lg object-cover" />
+                {ph.media_type === "video" ? (
+                  <video src={ph.photo_url} className="h-24 w-full rounded-lg bg-black object-cover" muted />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={ph.photo_url} alt={ph.caption || ""} className="h-24 w-full rounded-lg object-cover" />
+                )}
               </a>
             ))}
           </div>

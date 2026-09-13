@@ -325,7 +325,7 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
       {/* ------------------------------------------------------ */}
       <section className="mt-10">
         <div className="flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold text-brand">Photos de réalisations</h2>
+          <h2 className="font-heading text-lg font-bold text-brand">Photos et vidéos de réalisations</h2>
           <span className="text-xs text-gray-500">{photos?.length || 0}/5</span>
         </div>
 
@@ -333,8 +333,12 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
           <div className="mt-4 grid grid-cols-3 gap-2">
             {photos.map((p) => (
               <div key={p.id} className="relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.photo_url} alt={p.caption || ""} className="h-24 w-full rounded-lg object-cover" />
+                {p.media_type === "video" ? (
+                  <video src={p.photo_url} className="h-24 w-full rounded-lg object-cover" muted />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={p.photo_url} alt={p.caption || ""} className="h-24 w-full rounded-lg object-cover" />
+                )}
                 <form action={deleteArtisanPhoto} className="absolute right-1 top-1">
                   <input type="hidden" name="photoId" value={p.id} />
                   <button type="submit" className="rounded-full bg-black/60 px-1.5 text-xs text-white">✕</button>
@@ -351,7 +355,7 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
         ) : (
           <>
             <form action={addArtisanPhoto} className="mt-4 flex flex-col gap-2 sm:flex-row">
-              <FileInputButton name="photo" accept="image/*" multiple required label="Choisir des photos" className="flex-1" />
+              <FileInputButton name="photo" accept="image/*,video/*" multiple required label="Choisir des photos ou vidéos" className="flex-1" />
               <input
                 name="caption"
                 placeholder="Légende (optionnel, appliquée à toutes)"

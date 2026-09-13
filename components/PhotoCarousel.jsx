@@ -21,19 +21,27 @@ export default function PhotoCarousel({ photos }) {
   return (
     <>
       <div className="relative mt-3">
-        <button
-          type="button"
-          onClick={() => setZoomed(true)}
-          className="block w-full"
-          aria-label="Zoomer sur la photo"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+        {current.media_type === "video" ? (
+          <video
             src={current.photo_url}
-            alt={current.caption || "Réalisation"}
-            className="h-64 w-full rounded-xl object-cover"
+            controls
+            className="h-64 w-full rounded-xl bg-black object-contain"
           />
-        </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setZoomed(true)}
+            className="block w-full"
+            aria-label="Zoomer sur la photo"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={current.photo_url}
+              alt={current.caption || "Réalisation"}
+              className="h-64 w-full rounded-xl object-cover"
+            />
+          </button>
+        )}
 
         {photos.length > 1 && (
           <>
