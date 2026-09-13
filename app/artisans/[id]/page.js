@@ -128,7 +128,16 @@ export default async function ArtisanProfilePage({ params }) {
               <strong>À savoir avant de négocier :</strong> ne paie jamais la totalité en une seule fois. La plateforme impose un échéancier d'au moins {MIN_INSTALLMENTS_OTHER_TRADES} étapes pour ce métier — prévois ce découpage dans ta discussion avec l'artisan.
             </p>
             <p className="mt-2">
-              <strong>Exemple :</strong> 20% après les fondations, 20% après les murs, 20% après la toiture, 20% après la plomberie/électricité, 20% à la livraison. Autre possibilité : un paiement régulier (chaque semaine ou chaque mois) selon les jours réellement travaillés.
+              {artisan.trade === "Maçonnerie" ? (
+                <>
+                  <strong>Exemple pour la maçonnerie :</strong> 20% après les fondations, 20% après l'élévation des murs, 20% après la dalle, 20% après le chaînage/poteaux, 20% après les enduits et finitions.
+                </>
+              ) : (
+                <>
+                  <strong>Découpe selon ce métier précis</strong> — ne mélange pas avec le travail d'un autre artisan du même projet.
+                </>
+              )}{" "}
+              Autre possibilité : un paiement régulier (chaque semaine ou chaque mois) selon les jours réellement travaillés.
             </p>
           </div>
         )}

@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react";
 import { SINGLE_INSTALLMENT_TRADES, MIN_INSTALLMENTS_OTHER_TRADES } from "@/lib/constants";
 
-const EXAMPLE_SCHEDULE = [
+const MASONRY_EXAMPLE_SCHEDULE = [
   { title: "Fondations terminées", percentage: "20" },
-  { title: "Murs (élévation) terminés", percentage: "20" },
-  { title: "Toiture posée", percentage: "20" },
-  { title: "Plomberie et électricité terminées", percentage: "20" },
-  { title: "Finitions et livraison", percentage: "20" },
+  { title: "Élévation des murs", percentage: "20" },
+  { title: "Dalle / plancher coulé", percentage: "20" },
+  { title: "Chaînage et poteaux terminés", percentage: "20" },
+  { title: "Enduits et finitions maçonnerie", percentage: "20" },
 ];
 
 export default function MilestoneBuilder({ trade }) {
@@ -64,17 +64,23 @@ export default function MilestoneBuilder({ trade }) {
           </p>
 
           <div className="mb-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs text-gray-600">
-            <p className="font-semibold text-ink">Exemple pour une construction :</p>
-            <p className="mt-1">20% après les fondations, 20% après les murs, 20% après la toiture, 20% après la plomberie/électricité, 20% à la livraison.</p>
+            {trade === "Maçonnerie" ? (
+              <>
+                <p className="font-semibold text-ink">Exemple pour la maçonnerie :</p>
+                <p className="mt-1">20% après les fondations, 20% après l'élévation des murs, 20% après la dalle, 20% après le chaînage/poteaux, 20% après les enduits et finitions.</p>
+                <button
+                  type="button"
+                  onClick={() => setRows(MASONRY_EXAMPLE_SCHEDULE.map((r) => ({ ...r })))}
+                  className="mt-2 font-medium text-forest hover:underline"
+                >
+                  Remplir avec cet exemple
+                </button>
+              </>
+            ) : (
+              <p>Découpe l'échéancier selon les vraies étapes de <strong>ce métier précis</strong> — ne mélange pas avec le travail d'un autre artisan du projet.</p>
+            )}
             <p className="mt-2 font-semibold text-ink">Autre façon de faire :</p>
             <p className="mt-1">Un paiement régulier (chaque semaine ou chaque mois) selon les jours réellement travaillés par l'artisan — à adapter avec lui selon la durée prévue du chantier.</p>
-            <button
-              type="button"
-              onClick={() => setRows(EXAMPLE_SCHEDULE.map((r) => ({ ...r })))}
-              className="mt-2 font-medium text-forest hover:underline"
-            >
-              Remplir avec cet exemple
-            </button>
           </div>
         </>
       )}
