@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { CI_CITIES, CONSTRUCTION_SERVICES, RECOMMENDATION_OPTIONS } from "@/lib/constants";
+import CitySelect from "@/components/CitySelect";
 
 export default async function ArtisansPage({ searchParams }) {
   const supabase = createClient();
@@ -72,12 +73,13 @@ export default async function ArtisansPage({ searchParams }) {
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-        <select name="city" defaultValue={city || ""} className="bg-white p-3 text-sm text-ink focus:outline-none">
-          <option value="">Toutes les villes</option>
-          {CI_CITIES.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
+        <CitySelect
+          cities={CI_CITIES}
+          name="city"
+          defaultValue={city || ""}
+          placeholder="Toutes les villes"
+          inputClassName="bg-white p-3 text-sm text-ink focus:outline-none w-full"
+        />
         <select name="recommendation" defaultValue={recommendation || ""} className="bg-white p-3 text-sm text-ink focus:outline-none">
           <option value="">Toute la liste</option>
           {RECOMMENDATION_OPTIONS.map((r) => (

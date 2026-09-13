@@ -6,6 +6,7 @@ import { CI_CITIES, CONSTRUCTION_SERVICES, ID_DOCUMENT_TYPES, MOBILE_MONEY_OPERA
 import ShareLocationButton from "@/components/ShareLocationButton";
 import FileInputButton from "@/components/FileInputButton";
 import TradeAndServices from "@/components/TradeAndServices";
+import CitySelect from "@/components/CitySelect";
 
 export default async function ArtisanProfileEditPage({ searchParams }) {
   const supabase = createClient();
@@ -186,17 +187,7 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
 
             <div>
               <label className="mb-1 block text-sm font-medium">Ville de base</label>
-              <select
-                name="city"
-                defaultValue={profile?.city || ""}
-                required
-                className="w-full rounded-lg border border-gray-300 p-2"
-              >
-                <option value="" disabled>Choisir une ville</option>
-                {CI_CITIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+              <CitySelect cities={CI_CITIES} name="city" defaultValue={profile?.city || ""} required />
             </div>
 
             <div>
@@ -264,18 +255,14 @@ export default async function ArtisanProfileEditPage({ searchParams }) {
                   Villes spécifiques uniquement
                 </label>
               </div>
-              <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {CI_CITIES.map((c) => (
-                  <label key={c} className="flex items-center gap-2 text-xs text-gray-600">
-                    <input
-                      type="checkbox"
-                      name="mobilityCities"
-                      value={c}
-                      defaultChecked={selectedMobilityCities.includes(c)}
-                    />
-                    {c}
-                  </label>
-                ))}
+              <div className="mt-2">
+                <CitySelect
+                  cities={CI_CITIES}
+                  name="mobilityCities"
+                  multiple
+                  defaultValues={selectedMobilityCities}
+                  placeholder="Ajouter une ville..."
+                />
               </div>
             </div>
 

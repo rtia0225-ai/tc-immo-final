@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import TrustBanner from "@/components/TrustBanner";
 import ConstructionWizard from "@/components/ConstructionWizard";
 import { CI_CITIES, CONSTRUCTION_SERVICES, HOUSE_TYPES, RECOMMENDATION_OPTIONS } from "@/lib/constants";
+import CitySelect from "@/components/CitySelect";
 
 const STEPS = [
   {
@@ -87,12 +88,12 @@ export default async function HomePage() {
             </div>
             <div className="bg-white p-3">
               <label className="block text-[11px] font-semibold uppercase tracking-wide text-gray-400">Ville</label>
-              <select name="city" defaultValue="" className="mt-0.5 w-full border-0 bg-transparent p-0 text-sm font-medium text-ink focus:outline-none">
-                <option value="">Toutes</option>
-                {CI_CITIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+              <CitySelect
+                cities={CI_CITIES}
+                name="city"
+                placeholder="Toutes"
+                inputClassName="mt-0.5 w-full border-0 bg-transparent p-0 text-sm font-medium text-ink focus:outline-none"
+              />
             </div>
             <div className="bg-white p-3">
               <label className="block text-[11px] font-semibold uppercase tracking-wide text-gray-400">Recommandation</label>

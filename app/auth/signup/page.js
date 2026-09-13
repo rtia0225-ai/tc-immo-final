@@ -2,6 +2,7 @@ import { signup } from "../actions";
 import Link from "next/link";
 import { CI_CITIES, CONSTRUCTION_SERVICES, MOBILE_MONEY_OPERATORS } from "@/lib/constants";
 import TradeAndServices from "@/components/TradeAndServices";
+import CitySelect from "@/components/CitySelect";
 
 export default function SignupPage({ searchParams }) {
   const role = searchParams?.role; // 'client' ou 'artisan', choisi à l'étape précédente
@@ -86,12 +87,7 @@ export default function SignupPage({ searchParams }) {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium">Ville de base</label>
-            <select name="city" required defaultValue="" className="w-full rounded-lg border border-gray-300 p-2">
-              <option value="" disabled>Choisir une ville</option>
-              {CI_CITIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+            <CitySelect cities={CI_CITIES} name="city" required />
           </div>
         </div>
 
@@ -146,13 +142,8 @@ export default function SignupPage({ searchParams }) {
                     Villes spécifiques uniquement
                   </label>
                 </div>
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  {CI_CITIES.map((c) => (
-                    <label key={c} className="flex items-center gap-2 text-xs text-gray-600">
-                      <input type="checkbox" name="mobilityCities" value={c} />
-                      {c}
-                    </label>
-                  ))}
+                <div className="mt-2">
+                  <CitySelect cities={CI_CITIES} name="mobilityCities" multiple placeholder="Ajouter une ville..." />
                 </div>
               </div>
 
