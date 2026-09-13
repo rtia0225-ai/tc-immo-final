@@ -123,9 +123,14 @@ export default async function ArtisanProfilePage({ params }) {
             <strong>À savoir avant de négocier :</strong> pour ce métier, le paiement se fait en une seule fois, uniquement à la livraison du {SINGLE_INSTALLMENT_TRADES[artisan.trade]} sur la plateforme.
           </p>
         ) : (
-          <p>
-            <strong>À savoir avant de négocier :</strong> ne paie jamais la totalité en une seule fois. La plateforme impose un échéancier d'au moins {MIN_INSTALLMENTS_OTHER_TRADES} étapes pour ce métier — prévois ce découpage dans ta discussion avec l'artisan.
-          </p>
+          <div>
+            <p>
+              <strong>À savoir avant de négocier :</strong> ne paie jamais la totalité en une seule fois. La plateforme impose un échéancier d'au moins {MIN_INSTALLMENTS_OTHER_TRADES} étapes pour ce métier — prévois ce découpage dans ta discussion avec l'artisan.
+            </p>
+            <p className="mt-2">
+              <strong>Exemple :</strong> 20% après les fondations, 20% après les murs, 20% après la toiture, 20% après la plomberie/électricité, 20% à la livraison. Autre possibilité : un paiement régulier (chaque semaine ou chaque mois) selon les jours réellement travaillés.
+            </p>
+          </div>
         )}
       </div>
 
